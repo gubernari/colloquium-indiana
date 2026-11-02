@@ -516,3 +516,10 @@ sup { font-size: .65em; line-height: 0; }
 .belle-ray { stroke-width: 3; fill: none; stroke-linecap: round; }
 .nu-ray { fill: none; stroke: var(--cyan); stroke-width: 2.5; stroke-dasharray: 7 6; }
 .pile .trk { stroke-opacity: .5; }
+
+/* default colour for figure labels (the c-* classes still win) */
+.fig-tag:not([class*="c-"]) { fill: var(--fg); }
+.fig-tag.c-dim { fill: var(--muted); }
+
+.det-spoke { stroke: var(--boson); stroke-width: 1; stroke-opacity: .45; fill: none; }
+.det-coil { fill: rgba(0, 230, 255, .22); stroke: var(--cyan); stroke-width: 1.5; }

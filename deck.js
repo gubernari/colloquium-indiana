@@ -644,9 +644,16 @@
   // SVG animations (SMIL): a particle is a dot moved along a path
   const motion = (parent, path, dur, begin = 0, extra = {}) =>
     el("animateMotion", { path, dur: dur + "s", begin: begin + "s", repeatCount: "indefinite", ...extra }, parent);
-  const pulse = (parent, attr, values, keyTimes, dur, begin = 0) =>
-    el("animate", { attributeName: attr, values, keyTimes, dur: dur + "s", begin: begin + "s", repeatCount: "indefinite" }, parent);
+  const pulse = (parent, attr, values, keyTimes, dur, begin = 0, count = "indefinite", fill = "remove") =>
+    el("animate", { attributeName: attr, values, keyTimes, dur: dur + "s", begin: begin + "s", repeatCount: count, fill }, parent);
   const dot = (parent, r, cls) => el("circle", { cx: 0, cy: 0, r, class: cls }, parent);
+  // play n times from `begin`, hidden before and after
+  const playN = (c, path, dur, begin, n, extra = {}) => {
+    c.setAttribute("opacity", "0");
+    el("set", { attributeName: "opacity", to: "1", begin: begin + "s", fill: "freeze" }, c);
+    motion(c, path, dur, begin, { repeatCount: n, fill: "freeze", ...extra });
+    el("set", { attributeName: "opacity", to: "0", begin: (begin + dur * n) + "s", fill: "freeze" }, c);
+  };
   const polar = (c, R, deg) => [c[0] + R * Math.cos(deg * Math.PI / 180), c[1] + R * Math.sin(deg * Math.PI / 180)];
   // text with italic symbol parts: parts = [[text, italic?], ...]
   function mixed(parent, attrs, parts) {
@@ -684,7 +691,7 @@
     if (still) { for (let i = 0; i < 9; i++) burst(true); return; }
     if (reduce) return;
     burst(false);
-    setInterval(() => { if (isPresent("s-part2")) burst(false); }, 700);
+    setInterval(() => { if (isPresent("s-part2")) burst(false); }, 1500);
   }
 
   /* ---- basic principle: beams, fields, collision ---- */
@@ -711,20 +718,23 @@
 
     const proton = (path) => {
       const c = dot(g, 9, "pt-m");
-      motion(c, path, 3, 0, { keyPoints: "0;1;1", keyTimes: "0;0.62;1", calcMode: "spline", keySplines: "0.55 0 1 1;0 0 1 1" });
-      pulse(c, "opacity", "1;1;0;0", "0;0.62;0.63;1", 3);
+      // three collisions, 5.5 s each: a short wait, the protons speed up and collide at 55% of the cycle; then they are gone
+      motion(c, path, 5.5, 0, { repeatCount: 3, keyPoints: "0;0;1;1", keyTimes: "0;0.2;0.55;1", calcMode: "spline", keySplines: "0 0 1 1;0.55 0 1 1;0 0 1 1" });
+      pulse(c, "opacity", "1;1;0;0", "0;0.55;0.551;1", 5.5, 0, 3);
+      el("set", { attributeName: "opacity", to: "0", begin: "16.5s", fill: "freeze" }, c);
     };
     proton("M40 270 H292");
     proton("M560 270 H308");
     const burst = el("g", { transform: "translate(300 270)" }, g);
     const flash = el("circle", { r: 6, class: "flash" }, burst);
-    pulse(flash, "opacity", "0;0;0.9;0", "0;0.62;0.68;1", 3);
-    pulse(flash, "r", "6;6;46;46", "0;0.62;0.9;1", 3);
-    [[-190, -110, "pt-a"], [170, -120, "pt-c"], [-200, 40, "pt-m"], [185, 60, "pt-a"],
-     [-120, 150, "pt-c"], [110, 160, "pt-g"], [-40, -170, "pt-g"], [45, -165, "pt-m"]].forEach(([dx, dy, cls]) => {
+    pulse(flash, "opacity", "0;0;0.9;0;0", "0;0.55;0.58;0.7;1", 5.5, 0, 3);
+    pulse(flash, "r", "6;6;46;46", "0;0.55;0.7;1", 5.5, 0, 3);
+    [[-230, -12, "pt-a"], [230, 14, "pt-c"], [-70, -125, "pt-m"], [75, -118, "pt-a"],
+     [-70, 125, "pt-c"], [72, 128, "pt-g"], [-165, 20, "pt-g"], [168, -22, "pt-m"]].forEach(([dx, dy, cls]) => {
       const c = dot(burst, 6, cls);
-      motion(c, `M0 0 L${dx} ${dy}`, 3, 0, { keyPoints: "0;0;1;1", keyTimes: "0;0.62;0.95;1" });
-      pulse(c, "opacity", "0;0;1;1;0", "0;0.62;0.64;0.92;1", 3);
+      c.setAttribute("opacity", "0");
+      motion(c, `M0 0 L${dx} ${dy}`, 5.5, 0, { repeatCount: 3, keyPoints: "0;0;1;1", keyTimes: "0;0.55;0.97;1" });
+      pulse(c, "opacity", "0;0;1;1;0", "0;0.55;0.57;0.85;1", 5.5, 0, 3);
     });
     const e = txt(g, "E = mc", { x: 300, y: 100, "text-anchor": "middle", class: "fig-tag on-1", style: "font-size:34px" });
     el("tspan", { "baseline-shift": "super", "font-size": "70%" }, e).textContent = "2";
@@ -743,19 +753,23 @@
       el("circle", { cx: f(x), cy: f(y), r: 4, class: "electron" }, g);
     }
     el("circle", { cx: C[0], cy: C[1], r: 10, class: "nucleus-dot" }, g);
+    // each alpha particle crosses twice and then stays gone; the clock restarts whenever the slide is shown
+    const pass = (c, path, begin) => {
+      c.setAttribute("opacity", "0");
+      el("set", { attributeName: "opacity", to: "1", begin: begin + "s", fill: "freeze" }, c);
+      motion(c, path, 4, begin, { repeatCount: 2, fill: "freeze" });
+      el("set", { attributeName: "opacity", to: "0", begin: (begin + 8) + "s", fill: "freeze" }, c);   // gone after the second pass
+    };
     const ys = [110, 160, 210, 330, 380, 430];
     ys.forEach((y, i) => {
       el("path", { d: `M10 ${y} H590`, class: "alpha-track" }, g);
-      const a = dot(g, 7, "pt-a");
-      motion(a, `M-10 ${y} H610`, 4, -i * 0.7);
+      pass(dot(g, 7, "pt-a"), `M-10 ${y} H610`, i * 0.6);
     });
     // a slight deflection and a rare backscatter off the tiny nucleus
     el("path", { d: "M10 245 H326 C348 245 360 238 372 225 L590 120", class: "alpha-track hit" }, g);
-    const b = dot(g, 7, "pt-a");
-    motion(b, "M-10 245 H326 C348 245 360 238 372 225 L600 115", 4, -1.2);
+    pass(dot(g, 7, "pt-a"), "M-10 245 H326 C348 245 360 238 372 225 L600 115", 0.9);
     el("path", { d: "M10 270 H322 C336 270 340 282 332 296 L40 430", class: "alpha-track hit" }, g);
-    const c = dot(g, 7, "pt-a");
-    motion(c, "M-10 270 H322 C336 270 340 282 332 296 L20 440", 4, -2.4);
+    pass(dot(g, 7, "pt-a"), "M-10 270 H322 C336 270 340 282 332 296 L20 440", 2.1);
     mixed(g, { x: 340, y: 482, "text-anchor": "middle", class: "fig-tag" }, [["gold atom", 0]]);
     mixed(g, { x: 20, y: 70, class: "fig-tag" }, [["α", 1], [" particles", 0]]);
   }
@@ -794,11 +808,11 @@
     txt(lg, "synchrotron radiation", { x: 590, y: 512, "text-anchor": "end", class: "fig-tag c-photon" });
   }
 
-  /* ---- the LHC ring ---- */
+  /* ---- the LHC ring: two loops, then the beams collide at ATLAS and vanish ---- */
   function buildLHC() {
     const g = $("#lhc");
     if (!g) return;
-    const C = [300, 262], R = 150;
+    const C = [300, 262], R = 150, T = 3.4, END = 2 * T;
     el("circle", { cx: C[0], cy: C[1], r: R + 14, class: "ring-tube" }, g);
     el("circle", { cx: C[0], cy: C[1], r: R - 14, class: "ring-tube" }, g);
     const pts = [["ATLAS", -90, "middle", 0, -26], ["CMS", 90, "middle", 0, 38], ["ALICE", -45, "start", 22, -2], ["LHCb", -135, "end", -22, -2]];
@@ -807,10 +821,25 @@
       el("rect", { x: f(x - 11), y: f(y - 11), width: 22, height: 22, rx: 4, class: "expt" }, g);
       txt(g, name, { x: f(x + dx), y: f(y + dy + 8), "text-anchor": anchor, class: "fig-tag" });
     });
-    const top = `M${C[0]} ${C[1] - R}`;
-    motion(dot(g, 8, "pt-m"), `${top} A${R} ${R} 0 1 1 ${C[0] - 0.1} ${C[1] - R}`, 3.4, 0);
-    motion(dot(g, 8, "pt-m"), `${top} A${R} ${R} 0 1 0 ${C[0] + 0.1} ${C[1] - R}`, 3.4, -1.7);
     txt(g, "27 km", { x: 300, y: 276, "text-anchor": "middle", class: "legend-head", style: "font-size:34px" });
+    const top = [C[0], C[1] - R], start = `M${top[0]} ${top[1]}`;
+    const beam = (path) => {
+      const d = dot(g, 8, "pt-m");
+      motion(d, path, T, 0, { repeatCount: 2, fill: "freeze" });
+      el("set", { attributeName: "opacity", to: "0", begin: END + "s", fill: "freeze" }, d);
+    };
+    beam(`${start} A${R} ${R} 0 1 1 ${top[0] - 0.1} ${top[1]}`);
+    beam(`${start} A${R} ${R} 0 1 0 ${top[0] + 0.1} ${top[1]}`);
+    // after the second lap the two beams meet at ATLAS: flash and a spray of new particles
+    const fl = el("circle", { cx: top[0], cy: top[1], r: 6, class: "flash" }, g);
+    el("animate", { attributeName: "opacity", values: "0;0.9;0", dur: "1s", begin: END + "s", fill: "freeze" }, fl);
+    el("animate", { attributeName: "r", values: "6;34", dur: "1s", begin: END + "s", fill: "freeze" }, fl);
+    [[-70, -50, "pt-a"], [-25, -78, "pt-c"], [30, -78, "pt-g"], [72, -48, "pt-a"], [-55, 40, "pt-c"], [55, 42, "pt-g"]].forEach(([dx, dy, cls]) => {
+      const d = el("circle", { cx: top[0], cy: top[1], r: 5, class: cls, opacity: 0 }, g);
+      el("set", { attributeName: "opacity", to: "1", begin: END + "s", fill: "freeze" }, d);
+      el("animateMotion", { path: `M0 0 L${dx} ${dy}`, dur: "1.4s", begin: END + "s", fill: "freeze" }, d);
+      el("animate", { attributeName: "opacity", values: "1;1;0", keyTimes: "0;0.6;1", dur: "1.4s", begin: END + "s", fill: "freeze" }, d);
+    });
   }
 
   /* ---- LHC (II): pile-up event display, a new bunch crossing every second or so ---- */
@@ -831,55 +860,85 @@
           L *= 0.92;
         }
         el("path", { d: `M${f(x)} ${f(y)} Q${f(x + L / 2 * Math.cos(a))} ${f(y + L / 2 * Math.sin(a))} ${f(ex)} ${f(ey)}`,
-                     class: `${cls} drawon`, pathLength: 1, style: `--d:${delay}s;--dur:${dur}s` }, g);
+                     class: `${cls} drawon`, pathLength: 1, style: `--d:${(+delay + 0.9).toFixed(2)}s;--dur:${dur}s` }, g);   // starts 0.9 s after the slide appears
       };
       for (let v = 0; v < 28; v++) {
         const x = 300 + (r() - 0.5) * 130, y = 270 + (r() - 0.5) * 6, n = 5 + Math.floor(r() * 5);
         for (let i = 0; i < n; i++) track(x, y, 70 + r() * 200, "trk", (r() * 0.25).toFixed(2), 0.5);
-        el("circle", { cx: f(x), cy: f(y), r: 2.6, class: "pv" }, g);
+        el("circle", { cx: f(x), cy: f(y), r: 2.6, class: "pv fadein", style: "--d:0.9s" }, g);
       }
       const sx = 300 + (r() - 0.5) * 60;
       ["trk-k", "trk-mu", "trk-mu"].forEach((c) => track(sx, 270, 190 + r() * 90, c, 0.3, 0.6));
-      el("circle", { cx: f(sx), cy: 270, r: 5, class: "sv" }, g);
+      el("circle", { cx: f(sx), cy: 270, r: 5, class: "sv fadein", style: "--d:1.2s" }, g);
     };
     fill();
-    if (!reduce) setInterval(() => { if (isPresent("s-pileup")) fill(); }, 1300);
+    document.addEventListener("pileup-again", fill);   // a fresh crossing, drawn once, each time the slide is shown
   }
 
-  /* ---- the detectors, to scale, with a person ---- */
+  /* ---- the detectors, to scale (10 px per metre), with a person ---- */
   function buildDetectors() {
     const g = $("#detectors");
     if (!g) return;
-    const base = 430;
-    const label = (parts, x, y, w, cls = "fig-tag") => {
-      mixed(g, { x, y, "text-anchor": "middle", class: cls }, parts);
+    const ring = (parent, c, r, w, colour, op) =>
+      el("circle", { cx: c[0], cy: c[1], r, fill: "none", stroke: colour, "stroke-width": w, "stroke-opacity": op }, parent);
+    const label = (parent, x, y, name, size) => {
+      txt(parent, name, { x, y, "text-anchor": "middle", class: "fig-tag" });
+      txt(parent, size, { x, y: y + 28, "text-anchor": "middle", class: "fig-tag c-dim" });
     };
-    // ATLAS: 25 m (200 px at 8 px/m), end view with the toroid coils
-    const A = [140, base - 100];
-    [100, 78, 56, 32].forEach((r) => el("circle", { cx: A[0], cy: A[1], r, class: "det-ring" }, g));
+    const base = 330;
+
+    // ATLAS: 25 m, end view: muon chambers, toroid coils, calorimeters, tracker
+    const A = [165, base - 125];
+    ring(g, A, 125, 1.5, "var(--boson)", 0.8);
+    ring(g, A, 106, 34, "var(--aqua)", 0.1);
     for (let k = 0; k < 8; k++) {
-      const [x, y] = polar(A, 89, 22.5 + 45 * k);
-      el("rect", { x: -9, y: -5, width: 18, height: 10, rx: 2, class: "det-coil", transform: `translate(${f(x)} ${f(y)}) rotate(${22.5 + 45 * k})` }, g);
+      const [x, y] = polar(A, 96, 22.5 + 45 * k);
+      el("rect", { x: -17, y: -7, width: 34, height: 14, rx: 4, class: "det-coil", transform: `translate(${f(x)} ${f(y)}) rotate(${22.5 + 45 * k + 90})` }, g);
+    }
+    ring(g, A, 66, 30, "var(--boson)", 0.22);
+    ring(g, A, 46, 12, "var(--magenta)", 0.28);
+    ring(g, A, 28, 16, "var(--cyan)", 0.2);
+    ring(g, A, 36, 1.2, "var(--boson)", 0.7);
+    for (let k = 0; k < 16; k++) {
+      const [x1, y1] = polar(A, 82, 11.25 + 22.5 * k), [x2, y2] = polar(A, 124, 11.25 + 22.5 * k);
+      el("path", { d: `M${f(x1)} ${f(y1)} L${f(x2)} ${f(y2)}`, class: "det-spoke" }, g);
     }
     el("circle", { cx: A[0], cy: A[1], r: 4, class: "pv" }, g);
-    label([["ATLAS", 0]], A[0], 470);
-    txt(g, "25 m", { x: A[0], y: 498, "text-anchor": "middle", class: "fig-tag c-dim" });
-    // person: 1.8 m
-    el("circle", { cx: 252, cy: base - 12.6, r: 2.4, class: "person" }, g);
-    el("path", { d: `M252 ${base - 10} V${base - 4} M247 ${base - 8} H257 M252 ${base - 4} L249 ${base} M252 ${base - 4} L255 ${base}`, class: "person-line" }, g);
-    txt(g, "person", { x: 252, y: 470, "text-anchor": "middle", class: "fig-tag c-dim" });
-    // CMS and LHCb appear with the click
+    label(g, A[0], 372, "ATLAS", "25 m");
+
+    // a person, 1.8 m
+    const P = 322;
+    el("circle", { cx: P, cy: base - 16.4, r: 3, class: "person" }, g);
+    el("path", { d: `M${P} ${base - 13} V${base - 6} M${P - 5} ${base - 11} H${P + 5} M${P} ${base - 6} L${P - 3} ${base} M${P} ${base - 6} L${P + 3} ${base}`, class: "person-line" }, g);
+    txt(g, "person", { x: P, y: 372, "text-anchor": "middle", class: "fig-tag c-dim" });
+    txt(g, "1.8 m", { x: P, y: 400, "text-anchor": "middle", class: "fig-tag c-dim" });
+
+    // CMS and LHCb come with the click
     const more = el("g", { class: "on-1" }, g);
-    const M = [344, base - 60];
-    [60, 46, 32, 18].forEach((r) => el("circle", { cx: M[0], cy: M[1], r, class: "det-ring" }, more));
+    const M = [462, base - 75];
+    ring(more, M, 75, 1.5, "var(--boson)", 0.8);
+    ring(more, M, 60, 26, "var(--boson)", 0.2);
+    for (let k = 0; k < 12; k++) {
+      const [x1, y1] = polar(M, 47, 15 + 30 * k), [x2, y2] = polar(M, 73, 15 + 30 * k);
+      el("path", { d: `M${f(x1)} ${f(y1)} L${f(x2)} ${f(y2)}`, class: "det-spoke" }, more);
+    }
+    ring(more, M, 38, 6, "var(--cyan)", 0.5);
+    ring(more, M, 27, 12, "var(--aqua)", 0.25);
+    ring(more, M, 13, 14, "var(--magenta)", 0.28);
     el("circle", { cx: M[0], cy: M[1], r: 3, class: "pv" }, more);
-    txt(more, "CMS", { x: M[0], y: 470, "text-anchor": "middle", class: "fig-tag" });
-    txt(more, "15 m", { x: M[0], y: 498, "text-anchor": "middle", class: "fig-tag c-dim" });
-    el("rect", { x: 424, y: base - 80, width: 168, height: 80, rx: 6, class: "det-ring" }, more);
-    [440, 480, 520, 560].forEach((x) => el("path", { d: `M${x} ${base - 80} V${base}`, class: "det-ring thin" }, more));
-    el("circle", { cx: 436, cy: base - 40, r: 4, class: "pv" }, more);
-    txt(more, "LHCb", { x: 508, y: 470, "text-anchor": "middle", class: "fig-tag" });
-    txt(more, "21 m", { x: 508, y: 498, "text-anchor": "middle", class: "fig-tag c-dim" });
+    label(more, M[0], 372, "CMS", "15 m");
+
+    const L = { x: 40, y: 438, w: 210, h: 90 };              // 21 m x 9 m
+    el("rect", { x: L.x, y: L.y, width: L.w, height: L.h, rx: 6, class: "det-ring" }, more);
+    el("path", { d: `M${L.x + 6} ${L.y + L.h / 2} L${L.x + L.w - 4} ${L.y + 12} V${L.y + L.h - 12} Z`, class: "cone" }, more);
+    el("rect", { x: L.x + 62, y: L.y + 12, width: 34, height: L.h - 24, rx: 5, class: "det-magnet" }, more);
+    [L.x + 22, L.x + 36].forEach((x) => el("rect", { x: x - 2, y: L.y + 30, width: 4, height: 30, rx: 1, class: "stn" }, more));
+    [118, 130, 142].forEach((x) => el("rect", { x: L.x + x - 2, y: L.y + 20, width: 4, height: L.h - 40, rx: 1, class: "stn" }, more));
+    [L.x + 160, L.x + 172].forEach((x) => el("rect", { x: x - 4, y: L.y + 12, width: 8, height: L.h - 24, rx: 1, class: "stn thick" }, more));
+    [188, 196, 204].forEach((x) => el("rect", { x: L.x + x - 2, y: L.y + 8, width: 4, height: L.h - 16, rx: 1, class: "stn" }, more));
+    el("circle", { cx: L.x + 8, cy: L.y + L.h / 2, r: 3, class: "pv" }, more);
+    txt(more, "LHCb", { x: 300, y: 470, class: "fig-tag" });
+    txt(more, "21 m long", { x: 300, y: 498, class: "fig-tag c-dim" });
   }
 
   /* ---- LHCb: forward spectrometer with a B decay ---- */
@@ -901,7 +960,7 @@
                    ["M74 270 L220 274 Q290 288 340 308 L580 400", "pt-c"]];
     paths.forEach(([d, cls], i) => {
       el("path", { d, class: "alpha-track" }, g);
-      motion(dot(g, 6, cls), d, 2.6, -i * 0.05);
+      playN(dot(g, 6, cls), d, 2.6, i * 0.05, 3);
     });
     el("path", { d: "M60 270 L74 270", class: "b-flight" }, g);
     el("circle", { cx: 74, cy: 270, r: 5, class: "sv" }, g);
@@ -911,40 +970,75 @@
     txt(g, "muon stations", { x: 590, y: 440, "text-anchor": "end", class: "fig-tag" });
   }
 
-  /* ---- B factory: e+ e- -> B B-bar ---- */
+  /* ---- B factory: e+ e- -> B B-bar, three times, the B mesons flying in random directions ---- */
   function buildBelle() {
     const g = $("#belle");
     if (!g) return;
-    const T = 4.4;
-    const lep = (path, big) => {
-      const c = dot(g, big ? 10 : 7, "pt-c");
-      motion(c, path, T, 0, { keyPoints: "0;1;1", keyTimes: "0;0.4;1" });
-      pulse(c, "opacity", "1;1;0;0", "0;0.4;0.41;1", T);
-    };
-    lep("M30 250 H292", true);
-    lep("M570 250 H308", false);
+    const T = 4.4, N = 2, rnd = Math.random;   // two plays per state: before and after the click
     mixed(g, { x: 30, y: 218, class: "fig-tag c-lep" }, [["e", 1], ["−", 0]]);
     mixed(g, { x: 570, y: 218, "text-anchor": "end", class: "fig-tag c-lep" }, [["e", 1], ["+", 0]]);
-    const c0 = el("g", { transform: "translate(300 250)" }, g);
-    const flash = el("circle", { r: 6, class: "flash" }, c0);
-    pulse(flash, "opacity", "0;0;0.9;0", "0;0.4;0.46;0.7", T);
-    pulse(flash, "r", "6;6;40;40", "0;0.4;0.7;1", T);
-    // two B mesons, nearly at rest, then their decays
-    [-1, 1].forEach((s) => {
-      const gb = el("g", {}, c0);
-      const b = el("circle", { cx: 0, cy: 0, r: 22, class: "pt-m" }, gb);
-      motion(gb, `M0 0 L${s * 120} 0`, T, 0, { keyPoints: "0;0;1;1", keyTimes: "0;0.4;0.65;1" });
-      pulse(gb, "opacity", "0;0;1;1;0", "0;0.4;0.42;0.66;0.68", T);
-      mixed(gb, { x: 0, y: 8, "text-anchor": "middle", class: "quark-txt" }, s < 0 ? [["B", 1, 1]] : [["B", 1]]);
-      const dk = el("g", { transform: `translate(${300 + s * 120} 250)` }, g);
-      const rays = [[-60 * s, -40, "trk-k"], [-35 * s, 62, "trk-mu"], [66 * s, -10, "trk-mu"]];
-      rays.forEach(([dx, dy, cls]) => el("path", { d: `M0 0 L${dx} ${dy}`, class: `${cls} belle-ray` }, dk));
-      const nu = el("path", { d: `M0 0 L${s * 40} 70`, class: "nu-ray on-1" }, dk);
-      pulse(dk, "opacity", "0;0;1;1;0", "0;0.66;0.7;0.95;1", T);
-    });
-    txt(g, "10.6 GeV", { x: 300, y: 340, "text-anchor": "middle", class: "fig-tag c-dim" });
-    mixed(g, { x: 300, y: 456, "text-anchor": "middle", class: "fig-tag on-1" }, [["invisible neutrino", 0]]);
-    el("path", { d: "M130 450 H175", class: "nu-ray on-1", style: "stroke-dasharray:7 6" }, g);
+    txt(g, "10.6 GeV", { x: 580, y: 518, "text-anchor": "end", class: "fig-tag c-dim" });
+    mixed(g, { x: 80, y: 518, class: "fig-tag on-1" }, [["invisible neutrino", 0]]);
+    el("path", { d: "M20 511 H66", class: "nu-ray on-1", style: "stroke-dasharray:7 6" }, g);
+    const dyn = el("g", {}, g);
+
+    const cycle = (k) => {
+      const b0 = k * T;
+      const last = k === N - 1;          // the last round stays on screen
+      const lepton = (path) => {
+        const c = dot(dyn, 8, "pt-c");                  // electron and positron: same size
+        c.setAttribute("opacity", "0");
+        motion(c, path, T, b0, { repeatCount: 1, keyPoints: "0;1;1", keyTimes: "0;0.4;1" });
+        pulse(c, "opacity", "1;1;0;0", "0;0.4;0.41;1", T, b0, 1);
+      };
+      lepton("M30 250 H292");
+      lepton("M570 250 H308");
+      const c0 = el("g", { transform: "translate(300 250)" }, dyn);
+      const flash = el("circle", { r: 6, class: "flash" }, c0);
+      pulse(flash, "opacity", "0;0;0.9;0;0", "0;0.4;0.46;0.7;1", T, b0, 1);
+      pulse(flash, "r", "6;6;40;40", "0;0.4;0.7;1", T, b0, 1);
+
+      // the pair flies apart back to back; angle to the beam ~ sin^2 (a vector decaying into two scalars)
+      let th;
+      do { th = rnd() * Math.PI; } while (rnd() > Math.sin(th) ** 2);
+      if (rnd() < 0.5) th = -th;
+      const invSide = rnd() < 0.5 ? 1 : -1;
+      [1, -1].forEach((s) => {
+        const dx = s * 105 * Math.cos(th), dy = s * 105 * Math.sin(th);
+        const gb = el("g", { opacity: 0 }, c0);
+        el("circle", { cx: 0, cy: 0, r: 22, class: "pt-m" }, gb);
+        mixed(gb, { x: 0, y: 8, "text-anchor": "middle", class: "quark-txt" }, s < 0 ? [["B", 1, 1]] : [["B", 1]]);
+        motion(gb, `M0 0 L${f(dx)} ${f(dy)}`, T, b0, { repeatCount: 1, keyPoints: "0;0;1;1", keyTimes: "0;0.4;0.65;1" });
+        pulse(gb, "opacity", "0;0;1;1;0;0", "0;0.4;0.42;0.66;0.68;1", T, b0, 1);
+        // each B decays in a random direction: one into K mu+ mu- (all visible), the other into K nu nubar (invisible)
+        const invisible = s === invSide;
+        const dk = el("g", { transform: `translate(${f(300 + dx)} ${f(250 + dy)})`, opacity: 0 }, dyn);
+        const phi = rnd() * 2 * Math.PI;
+        const prongs = invisible
+          ? [["trk-k", ["K", "", ""], "--aqua"], ["nu-ray", ["ν", "", ""], "--cyan"], ["nu-ray", ["ν", "", ""], "--cyan", true]]
+          : [["trk-k", ["K", "", ""], "--aqua"], ["trk-mu", ["μ", "", "+"], "--cyan"], ["trk-mu", ["μ", "", "−"], "--cyan"]];
+        prongs.forEach(([cls, parts, colour, over], jj) => {
+          const a = phi + jj * 2.094 + (rnd() - 0.5) * 0.5, len = 66 + rnd() * 16;
+          const ex = len * Math.cos(a), ey = len * Math.sin(a), ux = Math.cos(a), uy = Math.sin(a);
+          const wrap = invisible && jj > 0 ? el("g", { class: "on-1" }, dk) : dk;     // the neutrinos appear with the click
+          // the line grows out of the decay vertex, like the tracks on the title slide
+          const ln = el("line", { x1: 0, y1: 0, x2: 0, y2: 0, class: `${cls} belle-ray` }, wrap);
+          el("animate", { attributeName: "x2", values: `0;0;${f(ex)};${f(ex)}`, keyTimes: "0;0.68;0.8;1", dur: T + "s", begin: b0 + "s", repeatCount: 1, fill: last ? "freeze" : "remove" }, ln);
+          el("animate", { attributeName: "y2", values: `0;0;${f(ey)};${f(ey)}`, keyTimes: "0;0.68;0.8;1", dur: T + "s", begin: b0 + "s", repeatCount: 1, fill: last ? "freeze" : "remove" }, ln);
+          // its label fades in as the line arrives
+          const t = el("text", { x: f(ex + 17 * ux), y: f(ey + 17 * uy + 7), class: "ev-label", "text-anchor": ux < 0 ? "end" : "start", opacity: 0, style: `fill:var(${colour})` }, wrap);
+          t.appendChild(document.createTextNode(parts[0]));
+          if (parts[2]) el("tspan", { "baseline-shift": "super", "font-size": "70%" }, t).textContent = parts[2];
+          if (over) t.setAttribute("text-decoration", "overline");
+          pulse(t, "opacity", "0;0;1;1", "0;0.8;0.88;1", T, b0, 1, last ? "freeze" : "remove");
+        });
+        if (last) pulse(dk, "opacity", "0;0;1;1", "0;0.66;0.67;1", T, b0, 1, "freeze");
+        else pulse(dk, "opacity", "0;0;1;1;0", "0;0.66;0.67;0.95;1", T, b0, 1);
+      });
+    };
+    const build = () => { dyn.replaceChildren(); for (let k = 0; k < N; k++) cycle(k); };
+    build();
+    document.addEventListener("belle-again", build);   // new random directions on every visit
   }
 
   buildCollisions();
@@ -993,6 +1087,10 @@
     }
   }
 
+  // safety net: SVG text has no colour of its own and would default to black on the dark background;
+  // a presentation attribute gives every label a light default, and any CSS rule still overrides it
+  document.querySelectorAll(".reveal svg text").forEach((t) => { if (!t.hasAttribute("fill")) t.setAttribute("fill", "#eef1f6"); });
+
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.04, center: false, hash: true,
     transition: "fade", backgroundTransition: "none",
@@ -1007,6 +1105,15 @@
   Reveal.on("ready", showNumber);
   Reveal.on("slidechanged", showNumber);
   const restage = () => applyStage(Reveal.getCurrentSlide());
+  const ONCE = { "s-basic": "#basic", "s-purpose": "#rutherford", "s-lhc1": "#lhc", "s-lhcb": "#lhcb", "s-belle": "#belle" };
+  const restartOnce = (id) => {
+    if (id === "s-belle") document.dispatchEvent(new Event("belle-again"));   // rebuild first, then restart the clock
+    if (ONCE[id]) { const s = $(ONCE[id]); try { s.setCurrentTime(0); s.unpauseAnimations(); } catch (err) {} }
+    if (id === "s-pileup") document.dispatchEvent(new Event("pileup-again"));
+  };
+  Reveal.on("slidechanged", (e) => restartOnce(e.currentSlide?.id));
+  Reveal.on("ready", (e) => restartOnce(e.currentSlide?.id));
+  ["fragmentshown", "fragmenthidden"].forEach((ev) => Reveal.on(ev, () => { if (Reveal.getCurrentSlide()?.id === "s-belle") restartOnce("s-belle"); }));
   Reveal.on("ready", () => document.querySelectorAll(".reveal .slides > section").forEach(applyStage));
   ["slidechanged", "fragmentshown", "fragmenthidden"].forEach((ev) => Reveal.on(ev, restage));
 
