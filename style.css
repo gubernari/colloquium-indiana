@@ -54,13 +54,14 @@ html, body { background: var(--bg); }
 .text.tight { gap: 20px; padding-top: 0; }
 .text > span.fragment { display: none; }   /* empty stage triggers, no layout space */
 .text .group { display: flex; flex-direction: column; gap: 4px; }
-.text .lead { font-weight: 600; color: var(--cyan); font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; }
+.text .lead { font-weight: 600; color: var(--cyan); font-size: 20px; }
 .text .aside { font-size: 21px; color: var(--muted); margin-top: -10px; }
 .fig { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
 .fig svg { width: 100%; height: auto; max-height: 500px; overflow: visible; }
 
 .hl-orange { color: var(--aqua); }
 .hl-aqua { color: var(--aqua); }
+.nobr { white-space: nowrap; }   /* keep a phrase on one line */
 sup { font-size: .65em; line-height: 0; }
 
 /* svg text */
@@ -110,7 +111,7 @@ sup { font-size: .65em; line-height: 0; }
 .charge { font-size: 18px; color: var(--muted); padding-left: 6px; }
 .hadron { fill: url(#hadron-fill); stroke: var(--boson); stroke-opacity: 0.5; stroke-width: 1.5; }
 .gluon { fill: none; stroke: var(--boson); stroke-width: 2; stroke-opacity: 0.75; transition: stroke .3s; }
-.gluon.flash { stroke: var(--fg); stroke-opacity: 1; }
+.gluon.swap { stroke: var(--fg); stroke-opacity: 1; }
 .quark-dot { stroke: var(--bg); stroke-width: 2; transition: fill .6s ease; }
 .quark-txt { fill: var(--bg); font-family: var(--font); font-size: 24px; font-weight: 700; pointer-events: none; }
 
@@ -137,10 +138,8 @@ sup { font-size: .65em; line-height: 0; }
 .forbid-label { fill: var(--magenta); font-family: var(--font); font-size: 20px; font-style: italic; }
 .mu-glow { stroke: var(--aqua); stroke-width: 12; stroke-linecap: round; fill: none; opacity: .75; }
 .k-glow { fill: none; stroke: var(--cyan); stroke-width: 6; opacity: .8; }
-.tux-body { fill: #1c2330; stroke: var(--fg); stroke-width: 1.5; }
-.tux-belly { fill: var(--fg); }
-.tux-eye { fill: #1c2330; }
-.tux-beak { fill: var(--aqua); }
+.meson.m-b { stroke: var(--magenta); stroke-width: 2.2; }
+.meson.m-k { stroke: var(--aqua); stroke-width: 2.2; }
 .fragment.draw .dl { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.1s cubic-bezier(.3,.7,.3,1); }
 .fragment.draw.visible .dl { stroke-dashoffset: 0; }
 .reveal .slides section .fragment.draw { opacity: 1; visibility: inherit; }
@@ -291,11 +290,12 @@ sup { font-size: .65em; line-height: 0; }
 .tl-year { fill: var(--muted); font-family: var(--font); font-size: 16px; }
 .tl-year.found { fill: var(--aqua); }
 .panel { fill: none; stroke: var(--line); }
-.st-1 #diphoton .pt { animation: appear-in .35s ease var(--d) backwards; }
+/* the whole diphoton plot appears at once with the click (no point-by-point build-up) */
 .err { stroke: var(--fg); stroke-opacity: .55; stroke-width: 1.4; }
 .pt-dot { fill: var(--fg); }
 .fit-bkg { fill: none; stroke: var(--muted); stroke-width: 2; }
 .fit-sig { fill: none; stroke: var(--aqua); stroke-width: 2.6; }
+.st-2 #diphoton .fit-sig.dl { transition-delay: .5s; }   /* the signal curves draw after the background */
 .mh-line { stroke: var(--aqua); stroke-width: 1.2; stroke-dasharray: 4 5; opacity: .7; }
 .mh-label { fill: var(--aqua); font-family: var(--font); font-size: 18px; font-weight: 500; }
 .mh-label.b { fill: var(--magenta); }
@@ -397,7 +397,9 @@ sup { font-size: .65em; line-height: 0; }
 .reveal .slide-number { font-size: 26.667px; }
 .reveal header { margin-bottom: 14px; }
 .frame { padding-bottom: 34px; }
-.text .lead, .text .aside { font-size: 21.333px; }
+.text .aside { font-size: 21.333px; }
+.text .lead { font-size: 26.667px; }   /* headings in the text column: body size, set apart by colour and weight */
+.fig-note { margin-top: 18px; font-size: 21.333px; color: var(--muted); text-align: center; line-height: 1.38; max-width: 520px; }
 .conclusion, .formula { font-size: 26.667px; }
 .reveal .katex, .formula .katex { font-size: 1em; }
 .title-wrap .author, .title-wrap .affil { font-size: 26.667px; }
@@ -461,7 +463,6 @@ sup { font-size: .65em; line-height: 0; }
 .st-2 .atom-view { opacity: 1; } .st-2 .ptable-view { opacity: 0; }
 .present .pt-cell { animation: appear-in .4s ease var(--d) backwards; }
 .still .pt-cell { animation: none !important; }
-.present #diphoton .pt { animation: appear-in .35s ease var(--d) backwards; }
 .still #diphoton .pt { animation: none !important; }
 
 /* legend squares take the colours of their pie slices */
@@ -523,3 +524,53 @@ sup { font-size: .65em; line-height: 0; }
 
 .det-spoke { stroke: var(--boson); stroke-width: 1; stroke-opacity: .45; fill: none; }
 .det-coil { fill: rgba(0, 230, 255, .22); stroke: var(--cyan); stroke-width: 1.5; }
+
+
+/* ===================== Part 3: new physics ===================== */
+/* acid lime marks new physics: the new heavy particle, its bump, the deviation it causes (and Neptune, the unseen planet); aqua is the SM prediction */
+#s-part3 .divider-center .divider-title { font-size: 104px; }
+.s-divider .vacuum { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* self-energy diagrams: a photon comes in, opens a quark loop, leaves again; then the whole diagram fades */
+.vp { animation: cb-fade .9s ease var(--f, 2s) forwards; }
+.vp-line { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; stroke-opacity: .65;
+  animation: cb-draw var(--dur, .5s) ease-out var(--d, 0s) forwards; }
+.vp-boson { stroke: var(--boson); } .vp-aqua { stroke: var(--aqua); } .vp-cyan { stroke: var(--cyan); } .vp-magenta { stroke: var(--magenta); }
+.vp-dot { opacity: 0; animation: appear .3s ease var(--d, 0s) forwards; }
+.still .vp, .still .vp-line, .still .vp-dot { animation: none !important; }
+.still .vp-line { stroke-dashoffset: 0; } .still .vp-dot { opacity: .8; }
+
+.text .group .aside { margin-top: 0; }
+.c-np { fill: var(--lime); color: var(--lime); } .c-sm { fill: var(--aqua); } .c-nep { fill: var(--lime); }
+.boson.np { stroke: var(--lime); stroke-width: 2.6; }
+.fit-sm { fill: none; stroke: var(--aqua); stroke-width: 2.6; }
+.fit-np { fill: none; stroke: var(--lime); stroke-width: 2.8; }
+.sm-dash { fill: none; stroke: var(--aqua); stroke-width: 1.8; stroke-dasharray: 7 6; }
+.dev-line { fill: none; stroke: var(--lime); stroke-width: 2; }
+.frac-line { stroke: var(--fg); stroke-width: 1.5; }
+.sun { fill: var(--orange); }
+.orbit-exp { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 7; }
+.orbit-obs { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-opacity: .7; }
+.orbit-n { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 3 7; }
+.planet-u { fill: var(--cyan); } .planet-n { fill: var(--lime); }
+.ghost { fill: none; stroke: var(--lime); stroke-width: 2; stroke-dasharray: 4 5; }
+.vt { stroke: var(--cyan); }
+.mini-chip { fill: var(--surface); stroke: var(--fg); stroke-width: 2; }
+.r-direct { fill: var(--aqua); } .r-indirect { fill: var(--magenta); }
+.bar-in { fill: var(--bg); font-family: var(--font); font-size: 23px; font-weight: 600; }
+.rbar { transform-box: fill-box; transform-origin: left center; }
+.st-1 #np .rbar { animation: grow 1.1s cubic-bezier(.3,.7,.3,1) var(--d, 0s) backwards; }
+/* parts that wait for their stage: .seq points come one after the other, .late labels after the lines are drawn */
+.seq { opacity: 0; }
+.st-1 .on-1 .seq, .st-2 .on-2 .seq { animation: appear .4s ease var(--d, 0s) forwards; }
+.late { opacity: 0; transition: opacity .4s ease .9s; }
+.st-1 .on-1 .late, .st-2 .on-2 .late, .st-3 .on-3 .late { opacity: 1; }
+.present .fadeaway { animation: vanish .5s ease var(--d, 0s) forwards; }
+@keyframes vanish { to { opacity: 0; } }
+.still .seq { animation: none !important; opacity: 1; }
+.still .late { transition: none !important; }
+.still .fadeaway { animation: none !important; opacity: 0; }
+.still .rbar { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .seq { opacity: 1; animation: none !important; } .late { transition: none; }
+  .st-1 #np .rbar, .present .fadeaway { animation: none !important; } .fadeaway { opacity: 0; }
+}

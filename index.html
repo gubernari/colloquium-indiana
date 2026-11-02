@@ -246,7 +246,7 @@ On the click for masses, the particles move onto a logarithmic mass axis: each t
       <figure class="fig">
         <svg id="higgs" viewBox="0 0 600 540" role="img" aria-label="Timeline of predicted and discovered particles, and a simulated two-photon mass spectrum with the Higgs bump">
           <g id="timeline"></g>
-          <g id="diphoton"></g>
+          <g class="on-1" id="diphoton"></g>
         </svg>
       </figure>
     </div>
@@ -400,9 +400,9 @@ The vacuum in the beam pipes is emptier than interplanetary space.</aside>
       <div class="text">
         <p>~2,400 bunches in each beam, each with up to ~160 billion protons</p>
         <p>Bunches cross every 25 ns, so up to 40 million times per second</p>
-        <p>~60 collisions per crossing → ~1.5 billion collisions per second, each creating ~100 particles</p>
-        <p class="fragment fade-up" data-fragment-index="1">~1 petabyte of raw data per second: triggers keep only ~1 crossing in 10,000</p>
-        <p class="fragment fade-up" data-fragment-index="1">~1.5 exabytes (1.5 billion gigabytes) stored on a computing grid of 170+ sites in 42 countries</p>
+        <p>~60 collisions per crossing → ~1.5 billion collisions per second, <span class="nobr">each creating ~100 particles</span></p>
+        <p class="fragment fade-up" data-fragment-index="1">~\(10^6\) gigabytes of raw data per second: triggers keep only ~1 crossing in 10,000</p>
+        <p class="fragment fade-up" data-fragment-index="1">~\(1.5 \times 10^9\) gigabytes stored on a computing grid of 170+ sites in 42 countries</p>
       </div>
       <figure class="fig"><svg id="pileup" viewBox="0 0 600 540" role="img" aria-label="Many proton collisions in one bunch crossing, each producing a spray of tracks"></svg></figure>
     </div>
@@ -449,10 +449,10 @@ LHCb looks only at the forward direction because the b quarks are produced mostl
 <!-- ============================ SMALLER ACCELERATORS ============================ -->
 <section id="s-belle">
   <div class="frame">
-    <header><h2>Not only the LHC: B factories</h2></header>
+    <header><h2>Not only the LHC: <em>B</em> factories</h2></header>
     <div class="cols">
       <div class="text">
-        <p>B factories collide electrons and positrons at just the right energy (10.6 GeV) to make a pair of \(B\) mesons</p>
+        <p>\(B\) factories collide electrons and positrons at just the right energy (10.6 GeV) to make a pair of \(B\) mesons</p>
         <p>BaBar (SLAC, USA) and Belle (KEK, Japan)</p>
         <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Belle II (Japan), running since 2019: aims for ~50× more data than Belle</p>
         <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Fewer \(B\) mesons than at the LHC, but very clean events: only the two \(B\) mesons, so even decays with invisible neutrinos can be studied</p>
@@ -464,23 +464,102 @@ LHCb looks only at the forward direction because the b quarks are produced mostl
 At 10.6 GeV the collision makes the Upsilon(4S), which decays almost only into a B and an anti-B that are nearly at rest: no other particles, so we know the total energy and can infer invisible neutrinos.</aside>
 </section>
 
-<!-- ============ BUILT AHEAD: moved into their sections later ============ -->
-<section id="s-penguin" data-visibility="hidden">
+<!-- ======================= PART 3 DIVIDER ======================= -->
+<section id="s-part3" class="s-divider" data-visibility="uncounted">
+  <svg class="vacuum" id="vacuum" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+  <div class="divider-center">
+    <p class="part">Part 3</p>
+    <h2 class="divider-title">New Physics</h2>
+  </div>
+  <aside class="notes">The loops in the background are virtual particle pairs: they pop out of the vacuum and disappear again, all the time. This is how heavy new particles can show up without being produced, the theme of this part.</aside>
+</section>
+
+<!-- ============================ TWO WAYS ============================ -->
+<section id="s-ways">
+  <div class="frame">
+    <header><h2>Two ways to find new particles</h2></header>
+    <div class="cols">
+      <div class="text">
+        <div class="group">
+          <p><b class="hl-aqua">Direct searches:</b> create new particles in collisions (\(E = mc^2\)) and look for a bump</p>
+          <p class="aside">→ needs ever bigger, more energetic colliders</p>
+        </div>
+        <div class="group fragment fade-up" data-stage="1" data-fragment-index="1">
+          <p><b class="hl-aqua">Indirect searches:</b> look for their small effects on known processes</p>
+          <p class="aside">→ needs very precise measurements and predictions</p>
+        </div>
+        <p class="fragment fade-up" data-stage="2" data-fragment-index="2">The two are complementary, and indirect searches often see hints first</p>
+      </div>
+      <figure class="fig"><svg id="ways" viewBox="0 0 600 540" role="img" aria-label="Top: a rate against energy, with a bump from a new particle on top of the SM curve. Bottom: precise measurements below the SM prediction band"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">Introduce 'precision' as the theme of the talk.
+Top: a direct search. If the collider has enough energy to make the new particle, it shows up as a bump on top of the SM expectation, like the Higgs did.
+Bottom: an indirect search. We measure a known process very precisely and compare with the SM prediction (the band is its uncertainty). If the measurements settle away from the band, something not in the SM contributes, even if it is far too heavy to be produced.</aside>
+</section>
+
+<!-- ============================ SEEING THE INVISIBLE ============================ -->
+<section id="s-invisible">
+  <div class="frame">
+    <header><h2>Seeing the invisible</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>1846: Neptune was found from tiny wobbles in Uranus’ orbit, before anyone saw it through a telescope</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Quantum mechanics: heavy particles can appear briefly (“virtually”) in interactions of known particles</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Even if they are too heavy to produce, they leave small fingerprints in what we measure</p>
+      </div>
+      <figure class="fig">
+        <svg id="invisible" viewBox="0 0 600 540" role="img" aria-label="Uranus' orbit bulges towards the unseen Neptune; below, two particles exchange a heavy virtual particle">
+          <defs>
+            <radialGradient id="sun-g"><stop offset="0" stop-color="#ff8600" stop-opacity="0.55"/><stop offset="1" stop-color="#ff8600" stop-opacity="0"/></radialGradient>
+          </defs>
+          <g id="solar"></g>
+          <g class="on-1" id="virtual"></g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Energy-time uncertainty in plain words: you can 'borrow' energy for a short time.
+Neptune: Le Verrier (and independently Adams) computed where an unseen planet had to be to explain the wobbles of Uranus; Galle found it on 23 September 1846, within 1° of the prediction. The bulge of the orbit in the picture is exaggerated.
+Bottom: two known particles exchange a heavy particle for a very short time. The heavier it is, the shorter the time and the smaller its effect: it shows up as a tiny change in what we measure.</aside>
+</section>
+
+<!-- ============================ FLAVOUR HAS DONE IT BEFORE ============================ -->
+<section id="s-history">
+  <div class="frame">
+    <header><h2>Flavour has done it before</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>1970, GIM: some kaon decays were missing → predicted the charm quark (found 1974)</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">1973, Kobayashi–Maskawa: CP violation (matter vs antimatter) → predicted a 3rd generation (Nobel 2008)</p>
+        <p class="fragment fade-up" data-stage="2" data-fragment-index="2">1987, ARGUS: \(B\)-meson mixing was large → the top quark must be very heavy (found 1995 at Fermilab)</p>
+        <p class="conclusion fragment fade-up" data-fragment-index="3">Each time, flavour predicted new particles before they were seen</p>
+      </div>
+      <figure class="fig"><svg id="history" viewBox="0 0 600 540" role="img" aria-label="Timeline: charm, the third generation and a heavy top quark, each predicted from flavour and found a few years later"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">Strong selling point: flavour has an excellent track record.
+GIM (Glashow, Iliopoulos, Maiani): a fourth quark cancels the kaon decays that were not seen (K_L → μμ); the J/ψ, a charm-anticharm pair, was found in November 1974 at SLAC and Brookhaven.
+Kobayashi and Maskawa: CP violation, seen in kaons in 1964, needs at least three generations. The b quark followed in 1977 (Fermilab), the top in 1995.
+ARGUS at DESY: B mesons turn into their antiparticles much faster than expected, so the top must be very heavy. It turned out to be 173 GeV.</aside>
+</section>
+
+<!-- ============================ RARE BEAUTY DECAYS ============================ -->
+<section id="s-penguin">
   <div class="frame">
     <header><h2>Rare beauty decays</h2></header>
     <div class="cols">
       <div class="text tight">
-        <p>B → K μ⁺μ⁻ decays are ideal to look for New Physics</p>
+        <p class="nobr">\(B \to K \mu^+\mu^-\) decays are ideal to look for New Physics</p>
         <div class="group fragment fade-up" data-fragment-index="1">
           <p class="lead">Theory perspective</p>
-          <p>In the SM, a beauty quark cannot turn directly into a strange quark</p>
+          <p>In the SM, a \(b\) quark cannot turn into an \(s\) quark directly</p>
         </div>
         <p class="fragment fade-up" data-fragment-index="2">Only possible through quantum loops → very rare</p>
-        <p class="fragment fade-up" data-fragment-index="3">B → K μ⁺μ⁻: less than one in a million B mesons</p>
-        <p class="aside fragment fade-up" data-fragment-index="4">These loops are called “penguin” diagrams, after a darts bet John Ellis lost in 1977</p>
+        <p class="fragment fade-up" data-fragment-index="3">Fewer than one \(B\) meson in a million <span class="nobr">decays into \(K \mu^+\mu^-\)</span></p>
         <div class="group fragment fade-up" data-fragment-index="5">
           <p class="lead">Experimental perspective</p>
-          <p>Muons and charged kaons are easy to detect and measure precisely</p>
+          <p>A clean signature: two muons and a kaon, easy to measure and with small backgrounds</p>
         </div>
       </div>
       <figure class="fig">
@@ -488,21 +567,22 @@ At 10.6 GeV the collision makes the Upsilon(4S), which decays almost only into a
           <defs>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
           </defs>
-          <ellipse class="meson" cx="60" cy="330" rx="36" ry="100"/>
-          <ellipse class="meson" cx="540" cy="330" rx="36" ry="100"/>
-          <text class="meson-label" x="60" y="342" text-anchor="middle">B</text>
-          <text class="meson-label" x="540" y="342" text-anchor="middle">K</text>
           <path class="quark" d="M540 395 H60"/><path class="arrow" d="M290 395 l14 -7 v14 z"/>
-          <text class="q-label" x="300" y="428" text-anchor="middle">d</text>
+          <text class="q-label" x="300" y="428" text-anchor="middle">u</text>
           <path class="quark q-b" d="M60 270 H200"/><path class="arrow a-b" d="M138 270 l-14 -7 v14 z"/>
           <text class="q-label t-b" x="128" y="252" text-anchor="middle">b</text>
           <path class="quark q-s" d="M400 270 H540"/><path class="arrow a-s" d="M478 270 l-14 -7 v14 z"/>
           <text class="q-label t-s" x="470" y="252" text-anchor="middle">s</text>
+          <!-- the mesons sit on top of the quark lines, so the lines start at their edge -->
+          <ellipse class="meson m-b" cx="60" cy="330" rx="36" ry="100"/>
+          <ellipse class="meson m-k" cx="540" cy="330" rx="36" ry="100"/>
+          <text class="meson-label" x="60" y="342" text-anchor="middle">B</text>
+          <text class="meson-label" x="540" y="342" text-anchor="middle">K</text>
           <g class="fragment" data-fragment-index="1">
             <g class="fragment fade-out" data-fragment-index="2">
               <path class="forbidden" d="M200 270 H400"/>
               <path class="cross" d="M286 256 l28 28 M314 256 l-28 28"/>
-              <text class="forbid-label" x="300" y="232" text-anchor="middle">no direct b → s</text>
+              <text class="forbid-label" x="300" y="232" text-anchor="middle"><tspan style="font-style:normal">no direct</tspan> b → s</text>
             </g>
           </g>
           <g class="fragment draw" data-fragment-index="2">
@@ -519,30 +599,45 @@ At 10.6 GeV the collision makes the Upsilon(4S), which decays almost only into a
             <path class="lepton dl" pathLength="1" d="M300 72 L215 26"/>
             <path class="lepton dl" pathLength="1" d="M300 72 L385 26"/>
             <circle class="vertex" cx="300" cy="72" r="5"/>
-            <text class="mu-label" x="196" y="30" text-anchor="end">μ⁺</text>
-            <text class="mu-label" x="404" y="30">μ⁻</text>
-          </g>
-          <g class="fragment" data-fragment-index="4">
-            <g class="tux" transform="translate(500 80)">
-              <ellipse cx="0" cy="40" rx="30" ry="40" class="tux-body"/>
-              <ellipse cx="0" cy="48" rx="19" ry="29" class="tux-belly"/>
-              <circle cx="-8" cy="14" r="3.5" class="tux-eye"/><circle cx="8" cy="14" r="3.5" class="tux-eye"/>
-              <path d="M-7 22 L7 22 L0 32 Z" class="tux-beak"/>
-              <path d="M-20 79 h14 l-7 -7 z M6 79 h14 l-7 -7 z" class="tux-beak"/>
-            </g>
+            <text class="mu-label" x="196" y="30" text-anchor="end">μ<tspan baseline-shift="super" font-size="70%" style="font-style:normal">+</tspan></text>
+            <text class="mu-label" x="404" y="30">μ<tspan baseline-shift="super" font-size="70%" style="font-style:normal">−</tspan></text>
           </g>
           <g class="fragment" data-fragment-index="5">
             <path class="mu-glow" d="M300 72 L215 26 M300 72 L385 26" filter="url(#glow)"/>
             <ellipse class="k-glow" cx="540" cy="330" rx="36" ry="100" filter="url(#glow)"/>
           </g>
         </svg>
+        <figcaption class="fig-note fragment fade-up" data-fragment-index="4">These loops are called “penguin” diagrams, after a darts bet John Ellis lost in 1977</figcaption>
       </figure>
     </div>
   </div>
   <aside class="notes">Analogy: hearing a whisper is easier in a quiet room. Rare decays are the quiet room.
-Build-up: first the direct jump (forbidden), then the loop with the W boson and the top quark, then the photon or Z that turns into the two muons.</aside>
+Build-up: first the direct jump (forbidden), then the loop with the W boson and the top quark, then the photon or Z that turns into the two muons.
+B → K μμ has a branching ratio of about 5 × 10^-7, B → K* μμ about 10^-6.
+The name: John Ellis lost a game of darts to Melissa Franklin and had to put the word "penguin" into his next paper.</aside>
 </section>
 
+<!-- ============================ RARE DECAYS AND NEW PARTICLES ============================ -->
+<section id="s-np">
+  <div class="frame">
+    <header><h2>Rare decays and new particles</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>A new heavy particle, e.g. a \(Z'\), can add its own contribution to the decay</p>
+        <p>The SM part is tiny → the new particle competes on equal terms → a large relative effect</p>
+        <p class="fragment fade-up" data-fragment-index="1">It only appears “virtually”, so it can be heavier than the LHC can produce</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="2">Its effect shrinks like \(1/M^2\), but precise measurements reach ~100 TeV</p>
+        <p class="conclusion fragment fade-up" data-fragment-index="3">We see a deviation, not the particle itself</p>
+      </div>
+      <figure class="fig"><svg id="np" viewBox="0 0 600 540" role="img" aria-label="A B meson decaying into a K meson and two muons through a new heavy Z' particle; below, the mass reach of direct and indirect searches"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">Analogy: hearing a whisper is easier in a quiet room. Rare decays are the quiet room.
+The Z′ is a heavier cousin of the Z boson that could couple differently to the three generations. In b → s μμ it acts directly (no loop needed), while the SM needs a loop: that is why even a very heavy Z′ can compete.
+The ~100 TeV reach assumes the new particle couples with roughly the strength of the known forces; for weaker couplings the reach is lower.</aside>
+</section>
+
+<!-- ============ BUILT AHEAD: moved into their sections later ============ -->
 <section id="s-lattice" data-visibility="hidden">
   <div class="frame">
     <header><h2>Lattice QCD: QCD on a supercomputer</h2></header>
