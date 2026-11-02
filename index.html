@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Flavour of Rare Particles</title>
+<link rel="stylesheet" href="lib/reveal.css">
+<link rel="stylesheet" href="lib/katex/katex.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--
+  How the builds work: text fragments carry data-stage="k". Each step adds the class st-k to the
+  slide, and figure parts use on-k (appear at stage k) and off-k (disappear at stage k).
+-->
+<!-- gradients shared by several slides (kept outside the slides so they always render) -->
+<svg class="shared-defs" width="0" height="0" aria-hidden="true">
+  <defs>
+    <radialGradient id="apple-g" cx="0.38" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#ffa6e6"/><stop offset="0.55" stop-color="#ff43c8"/><stop offset="1" stop-color="#a3157f"/>
+    </radialGradient>
+    <radialGradient id="cloud-g">
+      <stop offset="0" stop-color="#00e6ff" stop-opacity="0.42"/><stop offset="0.6" stop-color="#00e6ff" stop-opacity="0.1"/><stop offset="1" stop-color="#00e6ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="p-g"><stop offset="0" stop-color="#ff43c8"/><stop offset="1" stop-color="#ff43c8"/></radialGradient>
+    <radialGradient id="n-g"><stop offset="0" stop-color="#9aa5ba"/><stop offset="1" stop-color="#9aa5ba"/></radialGradient>
+    <radialGradient id="hadron-fill">
+      <stop offset="0" stop-color="#9aa5ba" stop-opacity="0.22"/><stop offset="1" stop-color="#9aa5ba" stop-opacity="0.03"/>
+    </radialGradient>
+    <marker id="arrow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8d97a9"/>
+    </marker>
+    <radialGradient id="halo-g"><stop offset="0" stop-color="#ff43c8" stop-opacity="0.5"/><stop offset="1" stop-color="#ff43c8" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================ TITLE ============================ -->
+<section id="s-title" class="s-title" data-visibility="uncounted">
+  <div class="title-grid">
+  <div class="title-wrap">
+    <h1>The flavour of<br><span class="hl-aqua">rare</span> particles</h1>
+    <p class="author">Nico Gubernari</p>
+    <p class="affil">University of Bonn</p>
+    <p class="role">Emmy Noether Group Leader<br><span class="dfg">Deutsche Forschungsgemeinschaft (DFG)</span></p>
+    <p class="event">Physics Colloquium · Indiana University<br>November 11, 2026</p>
+  </div>
+  <figure class="event-fig">
+    <svg id="event" viewBox="0 0 640 720" role="img" aria-label="Schematic event display of a B meson decaying into a kaon and two muons">
+      <g id="ev-rings"></g>
+      <g id="ev-prompt"></g>
+      <g id="ev-signal"></g>
+    </svg>
+  </figure>
+  </div>
+  <aside class="notes">Thank the hosts. Promise: by the end everyone knows what "flavour" is and why rare decays may reveal new physics.
+The picture is a cartoon of a collision seen along the beam: grey tracks come from the collision point; the B meson flies a few mm (magenta) before decaying into a kaon (cyan) and two muons (orange).</aside>
+</section>
+
+<!-- ======================= PART 1 DIVIDER ======================= -->
+<section id="s-part1" class="s-divider" data-visibility="uncounted">
+  <div class="bubbles" aria-hidden="true"></div>
+  <div class="divider-center">
+    <p class="part">Part 1</p>
+    <h2 class="divider-title">Quarks</h2>
+  </div>
+</section>
+
+<!-- ===================== WHAT EVERYTHING IS MADE OF ===================== -->
+<section id="s-zoom">
+  <div class="frame">
+    <header><h2>What everything is made of</h2></header>
+    <div class="cols">
+      <div class="text roomy">
+        <p>~400 BC: Democritus proposed that everything is made of tiny indivisible pieces, the <em>atomos</em> (“uncuttable”)</p>
+        <span class="fragment" data-stage="1" data-fragment-index="1"></span>
+        <p class="fragment fade-up" data-stage="2" data-fragment-index="2">But atoms can be split: nucleus, protons, neutrons and, deep inside, quarks</p>
+        <span class="fragment" data-stage="3" data-fragment-index="3"></span>
+        <p class="fragment fade-up" data-stage="4" data-fragment-index="4">Today: just 17 fundamental particles (quarks, leptons, force carriers, Higgs)</p>
+      </div>
+      <figure class="fig">
+        <svg id="zoom" viewBox="0 0 600 540" role="img" aria-label="Zooming from an apple to an atom, a nucleus, a proton and a quark">
+          <defs><clipPath id="zoom-clip"><circle cx="300" cy="215" r="195"/></clipPath></defs>
+          <circle class="zoom-ring" cx="300" cy="215" r="196"/>
+          <g clip-path="url(#zoom-clip)">
+            <rect x="100" y="15" width="400" height="400" class="zoom-bg"/>
+            <g class="zobj" data-z="0">
+              <path d="M300 128 C 236 88, 150 140, 166 232 C 180 318, 250 344, 300 318 C 350 344, 420 318, 434 232 C 450 140, 364 88, 300 128 Z" fill="url(#apple-g)"/>
+              <path d="M300 130 C 300 110, 306 92, 318 78" class="apple-stem"/>
+              <ellipse cx="342" cy="92" rx="30" ry="12" transform="rotate(-25 342 92)" class="apple-leaf"/>
+            </g>
+            <g class="zobj" data-z="1">
+              <circle cx="300" cy="215" r="190" fill="url(#cloud-g)"/>
+<g id="zoom-electrons"></g>
+              <circle cx="300" cy="215" r="13" class="nucleus-dot"/>
+              <text class="z-note" x="300" y="372" text-anchor="middle">carbon: 6 electrons</text>
+            </g>
+            <g class="zobj" data-z="2" id="zoom-nucleus"></g>
+            <g class="zobj" data-z="3" id="zoom-proton"></g>
+            <g class="zobj" data-z="4">
+              <circle cx="300" cy="215" r="90" fill="url(#halo-g)"/>
+              <circle cx="300" cy="215" r="26" class="quark-dot" style="fill:var(--magenta)"/>
+              <text class="quark-txt" x="300" y="223" text-anchor="middle">u</text>
+              <text class="z-note" x="300" y="338" text-anchor="middle">no measurable size</text>
+            </g>
+          </g>
+          <g id="zoom-ladder"></g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Engage the audience: ask how many layers they think there are.
+Each click zooms in: from an apple (10 cm) to an atom (a billion times smaller), to the nucleus (another 10,000 times smaller), to a proton, to a quark. Quarks and electrons show no size at all down to 10^-18 m.</aside>
+</section>
+
+<!-- ============================ EVERYDAY MATTER ============================ -->
+<section id="s-matter">
+  <div class="frame">
+    <header><h2>Everyday matter</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>Everything around us is made of just three particles: <b class="c-p">protons</b>, <b class="c-n">neutrons</b> and <b class="c-e">electrons</b></p>
+        <p>They form the ~100 elements: (almost) all you need for chemistry and biology</p>
+        <p class="fragment fade-up" data-stage="2" data-fragment-index="1">Electrons are fundamental: no substructure has ever been seen</p>
+        <p class="fragment fade-up" data-stage="2" data-fragment-index="1">Protons and neutrons are not fundamental: they are made of smaller pieces</p>
+      </div>
+      <figure class="fig">
+        <svg id="matter" viewBox="0 0 600 520" role="img" aria-label="A carbon atom and the periodic table of the elements">
+          <g class="atom-view">
+            <circle cx="300" cy="235" r="215" fill="url(#cloud-g)"/>
+            <g id="carbon-electrons"></g>
+            <g id="carbon-nucleus"></g>
+            <circle class="nuc-ring on-2" cx="300" cy="235" r="58"/>
+            <text class="fig-tag c-p on-2" x="300" y="152" text-anchor="middle">made of quarks</text>
+            <text class="fig-tag c-e on-2" x="300" y="24" text-anchor="middle">electrons: no substructure</text>
+          </g>
+          <g class="ptable-view">
+            <g id="ptable"></g>
+          </g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Keep it light; this is the familiar starting point.
+The element is fixed by the number of protons: 1 for hydrogen, 6 for carbon, 79 for gold.</aside>
+</section>
+
+<!-- ============================ QUARKS ============================ -->
+<section id="s-quarks">
+  <div class="frame">
+    <header><h2>Quarks with quirky names</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p><strong>Quarks</strong> are the building blocks of protons and neutrons, held together by the strong force</p>
+        <p>Proton = \(u + u + d\)<br>Neutron = \(u + d + d\)</p>
+        <blockquote class="fragment fade-up" data-fragment-index="1">
+          <p>“Three quarks for Muster Mark!”</p>
+          <cite>Gell-Mann took the name from James Joyce’s <em>Finnegans Wake</em></cite>
+        </blockquote>
+        <p class="fragment fade-up" data-fragment-index="1">Four more quarks exist: charm \(c\), strange \(s\), beauty \(b\), top \(t\)</p>
+      </div>
+      <figure class="fig">
+        <svg id="hadrons" viewBox="0 0 600 470" role="img" aria-label="A proton and a neutron, each with three quarks bound by gluons">
+          <g id="had-p"></g>
+          <g id="had-n"></g>
+          <g>
+            <text class="svg-label" x="160" y="345" text-anchor="middle">proton · <tspan class="it">uud</tspan></text>
+            <text class="svg-label" x="440" y="345" text-anchor="middle">neutron · <tspan class="it">udd</tspan></text>
+          </g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Mention the funny names. "Beauty" is the main character of this talk.
+The springs are gluons: they keep swapping the quarks' "colour" charge (the three colours). The force does not weaken when you pull quarks apart, so they never come out alone.</aside>
+</section>
+
+<!-- ============================ FLAVOUR ============================ -->
+<section id="s-flavour">
+  <div class="frame">
+    <header><h2>Nature repeats itself: flavour</h2></header>
+    <div class="cols">
+      <div class="text dense">
+        <p>Nature comes in three copies (“generations”) of quarks and leptons</p>
+        <p>The copies have the same charges and forces; only their masses differ</p>
+        <p><b class="hl-orange">Flavour</b> is the name for these copies</p>
+        <p class="fragment fade-up" data-stage="5" data-fragment-index="1">Generation 1 (\(u\), \(d\), \(e\), \(\nu_e\)) makes up all everyday matter</p>
+        <p class="fragment fade-up" data-stage="5" data-fragment-index="1">Generations 2 and 3 are heavier and unstable: they quickly decay into lighter particles</p>
+        <p class="fragment fade-up" data-stage="5" data-fragment-index="1">Transitions between different flavours are mediated by the&nbsp;$W$ boson</p>
+      </div>
+      <figure class="fig">
+        <svg id="gens" viewBox="0 0 600 540" role="img" aria-label="The three generations of quarks and leptons with their masses, and the CKM matrix">
+          <rect class="gen1-hl on-3" x="104" y="44" width="180" height="270" rx="14"/>
+          <g id="gen-grid"></g>
+          <g class="on-4" id="gen-decay"></g>
+          <g class="on-5" id="ckm"></g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Rabi on the muon: "Who ordered that?" Nobody knows why there are three copies.
+Circle sizes follow the mass on a logarithmic scale. The matrix shows how strongly the W boson connects each pair of quarks (the CKM matrix): transitions inside one generation are strong, transitions between generations are weak.</aside>
+</section>
+
+<!-- ============================ STANDARD MODEL ============================ -->
+<section id="s-sm">
+  <div class="frame">
+    <header><h2>The Standard Model of particle physics</h2></header>
+    <div class="cols">
+      <div class="text dense roomy">
+        <p>Matter: 6 quarks and 6 leptons</p>
+        <p>Forces are carried by particles: photon \(\gamma\) (electromagnetic), gluon \(g\) (strong), \(W\) and \(Z\) (weak)</p>
+        <p>The Higgs gives fundamental particles their mass</p>
+        <p class="fragment fade-up" data-stage="4" data-fragment-index="1">Masses span a huge range: \(m_\nu &lt; 1\) eV, \(m_e = 0.5\) MeV, \(m_t = 173\) GeV (as heavy as a gold atom)</p>
+        <p class="fragment fade-up" data-stage="4" data-fragment-index="1">Antimatter: every particle has a twin with the same mass but opposite charge (\(e^- \leftrightarrow e^+\))</p>
+      </div>
+      <figure class="fig">
+        <svg id="smtable" viewBox="0 0 600 530" role="img" aria-label="The particles of the Standard Model, then placed on a logarithmic mass axis">
+          <g class="off-3" id="sm-heads"></g>
+          <g class="on-3" id="sm-axis"></g>
+          <g class="on-4" id="sm-anti"></g>
+          <g id="sm-parts"></g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Stress the mass hierarchy: top quark ~340,000x electron. Unexplained.
+On the click for masses, the particles move onto a logarithmic mass axis: each tick is a factor 1000.</aside>
+</section>
+
+<!-- ============================ SM SUCCESS ============================ -->
+<section id="s-success">
+  <div class="frame">
+    <header><h2>The SM success</h2></header>
+    <div class="cols">
+      <div class="text dense roomy">
+        <p>\(W\), \(Z\), \(t\) and \(H\) were predicted, then found</p>
+        <p>Higgs discovered at CERN in 2012 (Nobel Prize 2013) using its decay to two photons</p>
+        <div class="fragment fade-up" data-stage="2" data-fragment-index="1">
+          <p>The bump is centered around the Higgs mass</p>
+          <p class="formula">\(N_\text{events} \propto \dfrac{1}{4\,(m_{\gamma\gamma}-m_H)^2+\Gamma_H^2}\)</p>
+        </div>
+        <p class="fragment fade-up" data-stage="3" data-fragment-index="1">The SM predicts thousands of experimental results with remarkable precision</p>
+      </div>
+      <figure class="fig">
+        <svg id="higgs" viewBox="0 0 600 540" role="img" aria-label="Timeline of predicted and discovered particles, and a simulated two-photon mass spectrum with the Higgs bump">
+          <g id="timeline"></g>
+          <g id="diphoton"></g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">This is arguably the most precisely tested theory in science.
+The bump: for every event with two photons we compute their combined (invariant) mass from the photon energies E1, E2 and the opening angle theta. Most photon pairs come from unrelated processes and give a smoothly falling distribution. Higgs bosons always produce pairs with mass 125 GeV, so they pile up in one place on top of the background.
+The plot is an illustrative simulation with the shape of the 2012 ATLAS/CMS plots; the lower panel shows the data minus the background.
+4th generation: the Z width measured at LEP gives 2.98 ± 0.01 light neutrino species; heavy 4th-generation quarks would also enhance Higgs production by gluon fusion about 9×, which the measured Higgs rates exclude. The SM has been tested over decades by hundreds of experiments.</aside>
+</section>
+
+<!-- ======================= SM IS NOT THE ULTIMATE THEORY ======================= -->
+<section id="s-limits">
+  <div class="frame">
+    <header><h2>The SM is not the ultimate theory of nature</h2></header>
+    <div class="cols">
+      <div class="text dense roomy">
+        <p>Dark matter: ~5× more than ordinary matter, and not in the SM</p>
+        <p class="fragment fade-up" data-fragment-index="1">Why did the Big Bang leave matter but no antimatter?</p>
+        <p class="fragment fade-up" data-fragment-index="1">The flavour puzzle: why three generations, and why do they have these masses?</p>
+        <p class="fragment fade-up" data-fragment-index="1">Gravity is not included</p>
+        <p class="conclusion fragment fade-up" data-fragment-index="1">→ There must be New Physics</p>
+      </div>
+      <figure class="fig">
+        <svg id="cosmos" viewBox="0 0 600 540" role="img" aria-label="Energy content of the universe, and the rotation curve of a galaxy">
+          <g id="donut"></g>
+          <g id="rotation"></g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Transition: so how do we find what's missing?
+Pie: Planck satellite values (4.9% ordinary matter, 26.8% dark matter, 68.3% dark energy). Rotation curve: stars far from the centre of a galaxy orbit too fast for the visible mass alone; the gap is attributed to dark matter (schematic curve).</aside>
+</section>
+
+<!-- ============================ THE BEAUTY QUARK ============================ -->
+<section id="s-beauty">
+  <div class="frame">
+    <header><h2>The beauty quark</h2></header>
+    <div class="cols">
+      <div class="text dense roomy">
+        <p>~4.5× heavier than a proton: the heaviest quark that forms bound states</p>
+        <p>It is lighter than the \(t\), so it must decay into another generation → a long lifetime</p>
+        <p><b class="hl-aqua">Quarks are never free</b>: the strong force grows as you pull them apart → we study <b class="c-p">\(B\) mesons</b>, a \(b\) quark bound to a light antiquark</p>
+        <p class="fragment fade-up" data-stage="3" data-fragment-index="1">A \(B\) meson lives ~1.5 × 10<sup>−12</sup> seconds, yet flies a few mm at the LHC → a visible displaced vertex</p>
+      </div>
+      <figure class="fig">
+        <svg id="bdecay" viewBox="0 0 600 540" role="img" aria-label="A B meson decaying into a D meson, a lepton and a neutrino; mass comparison; flight distance">
+          <defs><filter id="glow2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter></defs>
+          <g id="b-meson"></g>
+          <text class="svg-label" x="300" y="346" text-anchor="middle"><tspan class="it">B</tspan> meson: <tspan class="it">b</tspan> + <tspan class="it" style="text-decoration:overline">u</tspan></text>
+          <!-- 0-2: masses, 3: flight distance -->
+          <g class="off-3" id="mass-bars"></g>
+          <g class="on-3" id="flight"></g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">b -> c is the most common B decay: the b quark turns into a c quark and a W boson, which becomes a lepton and a neutrino.
+The lifetime is long because the W connects the third and second generations only weakly (|Vcb| ≈ 0.04, the small number in the CKM matrix).
+At the LHC the B mesons move close to the speed of light, so time dilation stretches the 1.5 ps into a flight of millimetres to centimetres.</aside>
+</section>
+
+<!-- ======================= PART 2 DIVIDER ======================= -->
+<section id="s-part2" class="s-divider" data-visibility="uncounted">
+  <svg class="collisions" id="collisions" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+  <div class="divider-center">
+    <p class="part">Part 2</p>
+    <h2 class="divider-title">Accelerators</h2>
+  </div>
+</section>
+
+<!-- ============================ BASIC PRINCIPLE ============================ -->
+<section id="s-basic">
+  <div class="frame">
+    <header><h2>Basic principle</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>Accelerate particles to speeds close to the speed of light and make them collide</p>
+        <p>Electric fields push charged particles; magnets steer and focus them</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">When they collide, \(E = mc^2\) turns their energy into new particles</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Higher energy → heavier particles</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">30,000+ accelerators worldwide, most of them in hospitals and industry</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Close to home: IU Cyclotron Facility (1975–2014), which also ran proton therapy</p>
+      </div>
+      <figure class="fig"><svg id="basic" viewBox="0 0 600 540" role="img" aria-label="Two proton beams accelerated by electric fields and magnets, colliding to make new particles"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">Connect to everyday life and to IU.
+Electric fields speed the particles up; magnets keep the beam on track and focused. At the collision point the kinetic energy is turned into the mass of new particles (E = mc^2): the higher the energy, the heavier the particles we can make.
+The IU Cyclotron Facility ran from 1975 to 2014 and also treated patients with proton therapy.</aside>
+</section>
+
+<!-- ============================ THE PURPOSE ============================ -->
+<section id="s-purpose">
+  <div class="frame">
+    <header><h2>The purpose</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>Probing the “shape” of particles and their internal structure through collisions</p>
+        <p><b>Produce new particles:</b> convert collision energy into mass (\(E=mc^2\)), allowing the creation and discovery of heavy particles</p>
+        <p class="fragment fade-up" data-fragment-index="1"><b>Test theoretical predictions:</b> measure particle interactions, cross sections, and decay properties to test the Standard Model and search for new physics</p>
+        <p class="fragment fade-up" data-fragment-index="1"><b>Study fundamental forces:</b> investigate how particles interact through the electromagnetic, weak, and strong forces</p>
+      </div>
+      <figure class="fig"><svg id="rutherford" viewBox="0 0 600 540" role="img" aria-label="Rutherford experiment: alpha particles pass through a gold atom, a few are scattered by its tiny nucleus"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">Rutherford (1909-1911): alpha particles shot at gold foil. Most go straight through, a few bounce back: the atom is mostly empty space with a tiny, dense nucleus. This is the template of every collider experiment: probe the structure by scattering.</aside>
+</section>
+
+<!-- ============================ THE SYNCHROTRON ============================ -->
+<section id="s-synch">
+  <div class="frame">
+    <header><h2>The synchrotron</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>Particles go around a ring many times instead of once</p>
+        <p>Radio-frequency cavities give the particles an energy kick on every lap</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">The magnets get stronger as the energy grows → the particles stay on the same circle</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Bending makes particles radiate (synchrotron radiation) → high energies need huge rings</p>
+      </div>
+      <figure class="fig"><svg id="synch" viewBox="0 0 600 540" role="img" aria-label="A ring accelerator with an RF cavity, dipole and quadrupole magnets, and a circulating proton bunch"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">Keep it conceptual. The LHC is a synchrotron.
+Click: dipole magnets bend the beam, quadrupoles focus it (like lenses). Every bend makes the particles radiate light; the lighter the particle and the higher the energy, the more they lose, which is why electron rings are so much larger than they need to be.</aside>
+</section>
+
+<!-- ============================ LHC NUMBERS I ============================ -->
+<section id="s-lhc1">
+  <div class="frame">
+    <header><h2>The LHC in numbers (I): the machine</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>A 27 km ring, ~100 m underground, on the border between France and Switzerland</p>
+        <p>The accelerator alone cost ~5 billion Swiss francs (built 1998–2008)</p>
+        <p>1232 superconducting dipole magnets bend the beams, at 8.3 tesla</p>
+        <p class="fragment fade-up" data-fragment-index="1">Cooled to 1.9 K: colder than outer space (2.7 K)</p>
+        <p class="fragment fade-up" data-fragment-index="1">Protons at 6.8 TeV move at 99.999999% of the speed of light: ~11,000 laps per second</p>
+        <p class="fragment fade-up" data-fragment-index="1">Each beam stores ~500 MJ: like a 400 tonne train at ~180 km/h</p>
+      </div>
+      <figure class="fig"><svg id="lhc" viewBox="0 0 600 540" role="img" aria-label="The LHC ring with the four big experiments ATLAS, CMS, ALICE and LHCb"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">CHECK all numbers against CERN 'LHC the guide' (Run 3 values).
+The vacuum in the beam pipes is emptier than interplanetary space.</aside>
+</section>
+
+<!-- ============================ LHC NUMBERS II ============================ -->
+<section id="s-pileup">
+  <div class="frame">
+    <header><h2>The LHC in numbers (II): the collisions</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>~2,400 bunches in each beam, each with up to ~160 billion protons</p>
+        <p>Bunches cross every 25 ns, so up to 40 million times per second</p>
+        <p>~60 collisions per crossing → ~1.5 billion collisions per second, each creating ~100 particles</p>
+        <p class="fragment fade-up" data-fragment-index="1">~1 petabyte of raw data per second: triggers keep only ~1 crossing in 10,000</p>
+        <p class="fragment fade-up" data-fragment-index="1">~1.5 exabytes (1.5 billion gigabytes) stored on a computing grid of 170+ sites in 42 countries</p>
+      </div>
+      <figure class="fig"><svg id="pileup" viewBox="0 0 600 540" role="img" aria-label="Many proton collisions in one bunch crossing, each producing a spray of tracks"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">CHECK numbers. 'Like finding a needle in a haystack, a billion times per second.'
+Each crossing produces hundreds to thousands of particles. The picture refreshes every second or so: every new picture is a different bunch crossing, with ~60 simultaneous collisions (pile-up); only one of them is the interesting one, drawn with coloured tracks.</aside>
+</section>
+
+<!-- ============================ PEOPLE AND DETECTORS ============================ -->
+<section id="s-detectors">
+  <div class="frame">
+    <header><h2>The people and the detectors</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>CERN: ~2,500 staff and 12,000+ visiting scientists from 70+ countries</p>
+        <p>ATLAS: 46 m long, 25 m tall, ~6,000 members (IU is part of ATLAS!)</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">CMS: 14,000 tonnes, heavier than the Eiffel Tower</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">LHCb: ~1,800 members, a detector built specifically to study \(b\) quarks</p>
+      </div>
+      <figure class="fig"><svg id="detectors" viewBox="0 0 600 540" role="img" aria-label="ATLAS, CMS and LHCb drawn to scale next to a person"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">CHECK collaboration sizes. Emphasise global collaboration.
+The drawing is to scale (sizes: ATLAS 25 m tall, CMS 15 m, LHCb about 21 m long), with a 1.8 m person next to ATLAS.</aside>
+</section>
+
+<!-- ============================ BEAUTY AT THE LHC ============================ -->
+<section id="s-lhcb">
+  <div class="frame">
+    <header><h2>Beauty quarks at the LHC</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>LHCb: ~1 million \(b\)-quark pairs every second, about \(10^{12}\) every year</p>
+        <p class="fragment fade-up" data-fragment-index="1">ATLAS and CMS: general-purpose detectors, but their huge data samples make them strong for \(B\) decays with muons, e.g. \(B_s \to \mu^+\mu^-\)</p>
+        <p class="fragment fade-up" data-fragment-index="1">Enough \(B\) mesons to see decays as rare as 1 in a billion</p>
+      </div>
+      <figure class="fig"><svg id="lhcb" viewBox="0 0 600 540" role="img" aria-label="The LHCb detector: a forward spectrometer with a B meson decaying into a kaon and two muons"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">CHECK production rate. Bridge to the next part: what do we do with all these B mesons?
+LHCb looks only at the forward direction because the b quarks are produced mostly close to the beam line, in a narrow cone.</aside>
+</section>
+
+<!-- ============================ SMALLER ACCELERATORS ============================ -->
+<section id="s-belle">
+  <div class="frame">
+    <header><h2>Smaller accelerators are also useful</h2></header>
+    <div class="cols">
+      <div class="text">
+        <p>B factories collide electrons and positrons at just the right energy (10.6 GeV) to make a pair of \(B\) mesons</p>
+        <p>BaBar (SLAC, USA) and Belle (KEK, Japan)</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Belle II (Japan), running since 2019: aims for ~50× more data than Belle</p>
+        <p class="fragment fade-up" data-stage="1" data-fragment-index="1">Fewer \(B\) mesons than at the LHC, but very clean events: only the two \(B\) mesons, so even decays with invisible neutrinos can be studied</p>
+      </div>
+      <figure class="fig"><svg id="belle" viewBox="0 0 600 540" role="img" aria-label="An electron and a positron collide and make two B mesons, which decay"></svg></figure>
+    </div>
+  </div>
+  <aside class="notes">CHECK production rate. Bridge to the next part: what do we do with all these B mesons?
+At 10.6 GeV the collision makes the Upsilon(4S), which decays almost only into a B and an anti-B that are nearly at rest: no other particles, so we know the total energy and can infer invisible neutrinos.</aside>
+</section>
+
+<!-- ============ BUILT AHEAD: moved into their sections later ============ -->
+<section id="s-penguin" data-visibility="hidden">
+  <div class="frame">
+    <header><h2>Rare beauty decays</h2></header>
+    <div class="cols">
+      <div class="text tight">
+        <p>B → K μ⁺μ⁻ decays are ideal to look for New Physics</p>
+        <div class="group fragment fade-up" data-fragment-index="1">
+          <p class="lead">Theory perspective</p>
+          <p>In the SM, a beauty quark cannot turn directly into a strange quark</p>
+        </div>
+        <p class="fragment fade-up" data-fragment-index="2">Only possible through quantum loops → very rare</p>
+        <p class="fragment fade-up" data-fragment-index="3">B → K μ⁺μ⁻: less than one in a million B mesons</p>
+        <p class="aside fragment fade-up" data-fragment-index="4">These loops are called “penguin” diagrams, after a darts bet John Ellis lost in 1977</p>
+        <div class="group fragment fade-up" data-fragment-index="5">
+          <p class="lead">Experimental perspective</p>
+          <p>Muons and charged kaons are easy to detect and measure precisely</p>
+        </div>
+      </div>
+      <figure class="fig">
+        <svg id="penguin" viewBox="0 0 600 470" role="img" aria-label="Penguin diagram for the decay of a B meson into a K meson and two muons">
+          <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+          </defs>
+          <ellipse class="meson" cx="60" cy="330" rx="36" ry="100"/>
+          <ellipse class="meson" cx="540" cy="330" rx="36" ry="100"/>
+          <text class="meson-label" x="60" y="342" text-anchor="middle">B</text>
+          <text class="meson-label" x="540" y="342" text-anchor="middle">K</text>
+          <path class="quark" d="M540 395 H60"/><path class="arrow" d="M290 395 l14 -7 v14 z"/>
+          <text class="q-label" x="300" y="428" text-anchor="middle">d</text>
+          <path class="quark q-b" d="M60 270 H200"/><path class="arrow a-b" d="M138 270 l-14 -7 v14 z"/>
+          <text class="q-label t-b" x="128" y="252" text-anchor="middle">b</text>
+          <path class="quark q-s" d="M400 270 H540"/><path class="arrow a-s" d="M478 270 l-14 -7 v14 z"/>
+          <text class="q-label t-s" x="470" y="252" text-anchor="middle">s</text>
+          <g class="fragment" data-fragment-index="1">
+            <g class="fragment fade-out" data-fragment-index="2">
+              <path class="forbidden" d="M200 270 H400"/>
+              <path class="cross" d="M286 256 l28 28 M314 256 l-28 28"/>
+              <text class="forbid-label" x="300" y="232" text-anchor="middle">no direct b → s</text>
+            </g>
+          </g>
+          <g class="fragment draw" data-fragment-index="2">
+            <path class="quark dl" pathLength="1" d="M200 270 H400"/><path class="arrow" d="M308 270 l-14 -7 v14 z"/>
+            <text class="q-label" x="300" y="300" text-anchor="middle">t</text>
+            <path id="w-boson" class="boson dl" pathLength="1" d=""/>
+            <text class="b-label" x="300" y="212" text-anchor="middle">W</text>
+            <path id="photon" class="boson photon dl" pathLength="1" d=""/>
+            <text class="b-label" x="320" y="124">γ, Z</text>
+            <circle class="vertex" cx="200" cy="270" r="5"/><circle class="vertex" cx="400" cy="270" r="5"/>
+            <circle class="vertex" cx="300" cy="160" r="5"/>
+          </g>
+          <g class="fragment draw" data-fragment-index="3">
+            <path class="lepton dl" pathLength="1" d="M300 72 L215 26"/>
+            <path class="lepton dl" pathLength="1" d="M300 72 L385 26"/>
+            <circle class="vertex" cx="300" cy="72" r="5"/>
+            <text class="mu-label" x="196" y="30" text-anchor="end">μ⁺</text>
+            <text class="mu-label" x="404" y="30">μ⁻</text>
+          </g>
+          <g class="fragment" data-fragment-index="4">
+            <g class="tux" transform="translate(500 80)">
+              <ellipse cx="0" cy="40" rx="30" ry="40" class="tux-body"/>
+              <ellipse cx="0" cy="48" rx="19" ry="29" class="tux-belly"/>
+              <circle cx="-8" cy="14" r="3.5" class="tux-eye"/><circle cx="8" cy="14" r="3.5" class="tux-eye"/>
+              <path d="M-7 22 L7 22 L0 32 Z" class="tux-beak"/>
+              <path d="M-20 79 h14 l-7 -7 z M6 79 h14 l-7 -7 z" class="tux-beak"/>
+            </g>
+          </g>
+          <g class="fragment" data-fragment-index="5">
+            <path class="mu-glow" d="M300 72 L215 26 M300 72 L385 26" filter="url(#glow)"/>
+            <ellipse class="k-glow" cx="540" cy="330" rx="36" ry="100" filter="url(#glow)"/>
+          </g>
+        </svg>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Analogy: hearing a whisper is easier in a quiet room. Rare decays are the quiet room.
+Build-up: first the direct jump (forbidden), then the loop with the W boson and the top quark, then the photon or Z that turns into the two muons.</aside>
+</section>
+
+<section id="s-lattice" data-visibility="hidden">
+  <div class="frame">
+    <header><h2>Lattice QCD: QCD on a supercomputer</h2></header>
+    <div class="cols">
+      <div class="text tight">
+        <p>Replace space and time by a grid of points: quarks sit on the points, gluons on the links between them</p>
+        <p class="fragment fade-up" data-fragment-index="1">The computer generates thousands of random “snapshots” of the gluon field and averages over them</p>
+        <p class="fragment fade-up" data-fragment-index="2">Then make the grid finer and the box bigger, and extrapolate to the real world</p>
+        <ul class="proscons">
+          <li class="pro fragment fade-up" data-fragment-index="3">from first principles, systematically improvable</li>
+          <li class="con fragment fade-up" data-fragment-index="4">very expensive; hard for a fast K meson</li>
+        </ul>
+      </div>
+      <figure class="fig">
+        <svg id="lattice" viewBox="0 0 600 560" role="img" aria-label="A space-time lattice with quarks on the sites and gluons on the links">
+          <g class="fragment fade-out" data-fragment-index="2">
+            <g id="lat-coarse"></g>
+            <path class="dim-line" d="M90 38 h70 M90 32 v12 M160 32 v12"/>
+            <text class="svg-label" x="125" y="26" text-anchor="middle">a</text>
+          </g>
+          <g class="fragment" data-fragment-index="2">
+            <g id="lat-fine"></g>
+            <text class="svg-label" x="300" y="16" text-anchor="middle">a → 0, box → ∞</text>
+          </g>
+          <g id="snap-frag" class="fragment" data-fragment-index="1">
+            <text id="snap-count" class="svg-caption" x="300" y="548" text-anchor="middle">gluon field · snapshot 1</text>
+          </g>
+        </svg>
+        <figcaption class="legend"><span class="dot"></span> quark <span class="link"></span> gluon</figcaption>
+      </figure>
+    </div>
+  </div>
+  <aside class="notes">Analogy: a weather forecast. The atmosphere is continuous, but the forecast is computed on a grid; a finer grid gives a better forecast and needs more computing power.
+Typical numbers: grid spacing below 0.1 fm, boxes of a few fm, about a billion numbers per snapshot. Calculations run for months on the largest supercomputers. Invented by Ken Wilson in 1974.
+Lattice QCD works best when the K meson is slow (large q^2); fast-moving light mesons need very fine grids.</aside>
+</section>
+
+</div>
+</div>
+<script src="lib/reveal.js"></script>
+<script src="lib/notes.js"></script>
+<script src="lib/katex/katex.min.js"></script>
+<script src="lib/katex/auto-render.min.js"></script>
+<script src="deck.js"></script>
+</body>
+</html>

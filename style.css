@@ -1,0 +1,518 @@
+/* Layout: 1280x720 slides; eyebrow + title top-left, text column left, animated SVG figure right.
+   Palette is the one fixed on the draft's first slide. Colours carry meaning across the deck:
+   orange = beauty quark / muons (the signal), cyan = strange / K meson, magenta = B meson,
+   violet = QCD and gluons, coral = forbidden / tension. */
+@font-face { font-family: "Jost"; font-style: normal; font-weight: 300 700; font-display: swap;
+  src: url("fonts/jost-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Jost"; font-style: normal; font-weight: 300 700; font-display: swap;
+  src: url("fonts/jost-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Jost"; font-style: italic; font-weight: 300 700; font-display: swap;
+  src: url("fonts/jost-latin-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "JostGreek"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/didact-gothic-greek.woff2") format("woff2"); unicode-range: U+0370-03FF, U+1F00-1FFF; }
+
+:root {
+  --bg: #0d1016;        /* near-black, biased toward the cyan accent */
+  --surface: #151a23;
+  --line: #2a3242;
+  --fg: #eef1f6;
+  --muted: #8d97a9;
+  --aqua: #00ffa0;
+  --orange: #ff8600;
+  --magenta: #ff43c8;
+  --cyan: #00e6ff;
+  --boson: #9aa5ba;     /* neutral: gluons, W, Z, photon */
+  --violet: #a56cff;
+  --coral: #ff5666;
+  --blue: #0096ff;
+  --lime: #c1ff45;
+  --font: "Jost", "JostGreek", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+html, body { background: var(--bg); }
+
+.reveal { font-family: var(--font); font-size: 26px; font-weight: 350; color: var(--fg); background: var(--bg); }
+.reveal .slides { text-align: left; }
+.reveal .slides section { height: 720px; padding: 0; box-sizing: border-box; }
+.reveal strong, .reveal b { font-weight: 600; }
+.reveal p { margin: 0; line-height: 1.38; }
+.reveal .controls { color: var(--aqua); }
+.reveal .progress { color: var(--aqua); height: 3px; }
+.reveal .slide-number { background: transparent; color: var(--muted); font-family: var(--font); font-size: 20px; font-weight: 400; left: auto; right: 44px; top: 38px; bottom: auto; }
+.reveal .slide-number a { color: inherit; text-decoration: none; }
+
+/* ---------- content slide frame ---------- */
+.frame { height: 100%; display: grid; grid-template-rows: auto 1fr; padding: 44px 64px 48px; box-sizing: border-box; }
+.reveal header { margin-bottom: 30px; padding-top: 26px; }
+.eyebrow { font-size: 16px !important; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--aqua); margin-bottom: 6px !important; }
+.reveal h2 { font-family: var(--font); font-size: 50px; font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; color: var(--fg); text-transform: none; margin: 0; text-wrap: balance; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; min-height: 0; }
+.text { display: flex; flex-direction: column; gap: 36px; padding-top: 34px; min-width: 0; }
+.text.tight { gap: 20px; padding-top: 0; }
+.text > span.fragment { display: none; }   /* empty stage triggers, no layout space */
+.text .group { display: flex; flex-direction: column; gap: 4px; }
+.text .lead { font-weight: 600; color: var(--cyan); font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; }
+.text .aside { font-size: 21px; color: var(--muted); margin-top: -10px; }
+.fig { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
+.fig svg { width: 100%; height: auto; max-height: 500px; overflow: visible; }
+
+.hl-orange { color: var(--aqua); }
+.hl-aqua { color: var(--aqua); }
+sup { font-size: .65em; line-height: 0; }
+
+/* svg text */
+.svg-label { fill: var(--fg); font-family: var(--font); font-size: 22px; font-weight: 500; }
+.svg-caption { fill: var(--muted); font-family: var(--font); font-size: 17px; font-style: italic; }
+
+/* ---------- 1. title ---------- */
+.title-grid { display: grid; grid-template-columns: 1fr 640px; height: 100%; }
+.title-wrap { align-self: center; padding-left: 80px; display: flex; flex-direction: column; gap: 10px; z-index: 1; }
+.reveal h1 { font-family: var(--font); font-size: 76px; font-weight: 600; line-height: 1.02; letter-spacing: -0.02em; text-transform: none; color: var(--fg); margin: 0 0 34px; }
+.title-wrap .author { font-size: 30px; font-weight: 500; }
+.title-wrap .affil { font-size: 24px; color: var(--muted); }
+.title-wrap .event { margin-top: 22px; font-size: 18px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--magenta); }
+.event-fig { margin: 0; position: relative; height: 720px; }
+.event-fig svg { width: 640px; height: 720px; display: block; }
+.event-fig figcaption { position: absolute; right: 36px; bottom: 50px; font-size: 17px; font-style: italic; color: var(--muted); }
+.ring { fill: none; stroke: var(--line); stroke-width: 1.2; }
+.ring.outer { stroke-dasharray: 3 7; }
+.trk { fill: none; stroke: #5d6b82; stroke-width: 1.3; stroke-opacity: 0.6; stroke-linecap: round; }
+.trk-b { fill: none; stroke: var(--magenta); stroke-width: 3; stroke-linecap: round; }
+.trk-k { fill: none; stroke: var(--cyan); stroke-width: 3; stroke-linecap: round; }
+.event-fig .trk-k { stroke: var(--aqua); }
+.trk-mu { fill: none; stroke: var(--aqua); stroke-width: 3.2; stroke-linecap: round; }
+.pv { fill: var(--fg); }
+.sv { fill: var(--magenta); }
+.ev-label { font-family: var(--font); font-size: 22px; font-weight: 500; }
+
+/* draw-on animation, played whenever the slide becomes current */
+.drawon { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.present .drawon { animation: draw var(--dur, 1s) cubic-bezier(.3,.7,.3,1) var(--d, 0s) forwards; }
+.fadein { opacity: 0; }
+.present .fadein { animation: appear .6s ease var(--d, 0s) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes appear { to { opacity: 1; } }
+
+/* ---------- 2. quarks ---------- */
+.reveal blockquote { margin: 0; padding: 0; width: auto; background: none; box-shadow: none; font-style: normal; }
+.reveal blockquote p { font-size: 30px; font-style: italic; font-weight: 400; color: var(--magenta); }
+.reveal blockquote cite { display: block; margin-top: 4px; font-size: 19px; font-style: normal; color: var(--muted); }
+.reveal blockquote em { font-style: italic; }
+.quark-table { display: grid; grid-template-columns: repeat(3, 76px) auto; gap: 6px 8px; margin-top: 10px; align-items: center; }
+.quark-table .gen { font-size: 15px; line-height: 1; letter-spacing: 0.14em; color: var(--muted); text-align: center; }
+.chip { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 54px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 15px; color: var(--muted); line-height: 1.1; }
+.chip b { font-size: 26px; font-weight: 600; color: var(--fg); }
+.chip.star { border-color: var(--aqua); box-shadow: 0 0 18px rgba(255, 134, 0, 0.35); }
+.chip.star b, .chip.star { color: var(--aqua); }
+.charge { font-size: 18px; color: var(--muted); padding-left: 6px; }
+.hadron { fill: url(#hadron-fill); stroke: var(--boson); stroke-opacity: 0.5; stroke-width: 1.5; }
+.gluon { fill: none; stroke: var(--boson); stroke-width: 2; stroke-opacity: 0.75; transition: stroke .3s; }
+.gluon.flash { stroke: var(--fg); stroke-opacity: 1; }
+.quark-dot { stroke: var(--bg); stroke-width: 2; transition: fill .6s ease; }
+.quark-txt { fill: var(--bg); font-family: var(--font); font-size: 24px; font-weight: 700; pointer-events: none; }
+
+/* ---------- 3. penguin ---------- */
+.meson { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.meson-label { fill: var(--fg); font-family: var(--font); font-size: 30px; font-weight: 600; }
+.quark { fill: none; stroke: var(--fg); stroke-width: 2.4; }
+.quark.q-b { stroke: var(--aqua); }
+.quark.q-s { stroke: var(--cyan); }
+.arrow { fill: var(--fg); }
+.arrow.a-b { fill: var(--aqua); }
+.arrow.a-s { fill: var(--cyan); }
+.q-label, .b-label, .mu-label { font-family: var(--font); font-size: 24px; font-weight: 500; fill: var(--fg); }
+.q-label.t-b { fill: var(--aqua); }
+.q-label.t-s { fill: var(--cyan); }
+.b-label { fill: var(--muted); font-style: italic; }
+.mu-label { fill: var(--aqua); }
+.boson { fill: none; stroke: var(--boson); stroke-width: 2.2; }
+.boson.photon { stroke: var(--aqua); }
+.lepton { fill: none; stroke: var(--aqua); stroke-width: 2.6; stroke-linecap: round; }
+.vertex { fill: var(--fg); }
+.forbidden { stroke: var(--magenta); stroke-width: 2.4; stroke-dasharray: 9 8; fill: none; }
+.cross { stroke: var(--magenta); stroke-width: 5; stroke-linecap: round; fill: none; }
+.forbid-label { fill: var(--magenta); font-family: var(--font); font-size: 20px; font-style: italic; }
+.mu-glow { stroke: var(--aqua); stroke-width: 12; stroke-linecap: round; fill: none; opacity: .75; }
+.k-glow { fill: none; stroke: var(--cyan); stroke-width: 6; opacity: .8; }
+.tux-body { fill: #1c2330; stroke: var(--fg); stroke-width: 1.5; }
+.tux-belly { fill: var(--fg); }
+.tux-eye { fill: #1c2330; }
+.tux-beak { fill: var(--aqua); }
+.fragment.draw .dl { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.1s cubic-bezier(.3,.7,.3,1); }
+.fragment.draw.visible .dl { stroke-dashoffset: 0; }
+.reveal .slides section .fragment.draw { opacity: 1; visibility: inherit; }
+.reveal .slides section .fragment.draw:not(.visible) text,
+.reveal .slides section .fragment.draw:not(.visible) circle,
+.reveal .slides section .fragment.draw:not(.visible) .arrow { opacity: 0; }
+.fragment.draw text, .fragment.draw circle, .fragment.draw .arrow { transition: opacity .4s ease .6s; }
+
+/* ---------- 4. lattice ---------- */
+.proscons { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.proscons li { position: relative; padding-left: 34px; line-height: 1.38; }
+.proscons li::before { position: absolute; left: 0; top: -2px; font-weight: 700; font-size: 30px; }
+.proscons .pro::before { content: "+"; color: var(--aqua); }
+.proscons .con::before { content: "−"; color: var(--magenta); }
+.lat-link { stroke: var(--boson); stroke-opacity: .55; stroke-width: 2; transition: stroke .25s, stroke-opacity .25s; }
+.lat-node { fill: var(--fg); }
+.dim-line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.present .lat-node.pop { transform-box: fill-box; transform-origin: center; animation: pop .5s cubic-bezier(.3,1.6,.5,1) var(--d, 0s) backwards; }
+@keyframes pop { from { transform: scale(0); } }
+.legend { margin-top: 6px; font-size: 18px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+.legend .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--fg); display: inline-block; }
+.legend .link { width: 34px; height: 3px; background: var(--boson); display: inline-block; margin-left: 18px; }
+
+/* ---------- stages: on-k appears at stage k, off-k disappears at stage k ---------- */
+.shared-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.on-1, .on-2, .on-3, .on-4, .on-5, .on-6 { opacity: 0; transition: opacity .6s ease; }
+.off-1, .off-2, .off-3, .off-4, .off-5, .off-6 { transition: opacity .6s ease; }
+.st-1 .on-1, .st-2 .on-2, .st-3 .on-3, .st-4 .on-4, .st-5 .on-5, .st-6 .on-6 { opacity: 1; }
+.st-1 .off-1, .st-2 .off-2, .st-3 .off-3, .st-4 .off-4, .st-5 .off-5, .st-6 .off-6 { opacity: 0; }
+.on-1 > .dl, .on-2 > .dl, .on-3 > .dl, .on-4 > .dl, .on-5 > .dl, .on-6 > .dl {
+  stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.2s cubic-bezier(.3,.7,.3,1); }
+.st-1 .on-1 > .dl, .st-2 .on-2 > .dl, .st-3 .on-3 > .dl, .st-4 .on-4 > .dl, .st-5 .on-5 > .dl, .st-6 .on-6 > .dl { stroke-dashoffset: 0; }
+@keyframes appear-in { from { opacity: 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes grow { from { transform: scaleX(0); } }
+
+.text.dense { font-size: 23px; gap: 22px; padding-top: 16px; }
+.svg-caption.small { font-size: 16px; }
+.fig-tag { font-family: var(--font); font-size: 18px; font-weight: 500; }
+.c-p { color: var(--magenta); fill: var(--magenta); }
+.c-n { color: #aab4c6; fill: #aab4c6; }
+.c-e { color: var(--cyan); fill: var(--cyan); }
+.c-l { fill: var(--aqua); }
+.c-life { fill: var(--aqua); }
+.c-anti { fill: var(--muted); }
+.row-label { fill: var(--fg); font-family: var(--font); font-size: 17px; }
+.row-charge { fill: var(--muted); }
+.gen-head { fill: var(--muted); font-family: var(--font); font-size: 16px; font-weight: 500; letter-spacing: .14em; }
+.gen-head.small { font-size: 16px; text-transform: uppercase; }
+.axis-line { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+.axis-tick { fill: var(--muted); font-family: var(--font); font-size: 16px; }
+.axis-title { fill: var(--muted); font-family: var(--font); font-size: 17px; }
+.axis-title.small { font-size: 16px; }
+.grid-line { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 5; fill: none; }
+.legend-head { fill: var(--fg); font-family: var(--font); font-size: 19px; font-weight: 500; }
+
+/* ---------- part divider ---------- */
+.divider { height: 100%; display: grid; grid-template-columns: 1fr 600px; align-items: center; padding-left: 96px; box-sizing: border-box; }
+.divider-text { display: flex; flex-direction: column; gap: 6px; }
+.divider .part { font-size: 18px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--aqua); }
+.reveal .divider-title { font-size: 120px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; margin: 0 0 40px; }
+.agenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: part; }
+.agenda li { counter-increment: part; font-size: 21px; color: var(--muted); display: flex; gap: 16px; }
+.agenda li::before { content: counter(part); width: 18px; color: var(--line); font-weight: 600; }
+.agenda li.now { color: var(--fg); font-weight: 600; }
+.agenda li.now::before { color: var(--aqua); }
+.present .agenda li { animation: appear-in .5s ease backwards; }
+.present .agenda li:nth-child(2) { animation-delay: .08s; } .present .agenda li:nth-child(3) { animation-delay: .16s; }
+.present .agenda li:nth-child(4) { animation-delay: .24s; } .present .agenda li:nth-child(5) { animation-delay: .32s; }
+.present .agenda li:nth-child(6) { animation-delay: .40s; }
+.divider-art { width: 600px; height: 600px; opacity: .6; overflow: visible; }
+
+/* ---------- zoom ---------- */
+.zoom-ring { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.zoom-bg { fill: var(--surface); }
+.zobj { transform-box: view-box; transform-origin: 300px 215px; transition: transform 1.1s cubic-bezier(.6,0,.3,1), opacity .8s ease; }
+.zobj.past { transform: scale(7); opacity: 0; }
+.zobj.next { transform: scale(.12); opacity: 0; }
+.zobj.now { transform: none; opacity: 1; }
+.apple-stem { stroke: #8a5a2b; stroke-width: 7; stroke-linecap: round; fill: none; }
+.apple-leaf { fill: var(--aqua); fill-opacity: .85; }
+.electron { fill: var(--cyan); }
+.nucleus-dot { fill: var(--magenta); }
+.z-note { fill: var(--muted); font-family: var(--font); font-size: 18px; }
+.orbit { transform-box: view-box; animation: spin var(--t, 8s) linear infinite; }
+#zoom .orbit { transform-origin: 300px 215px; }
+.nucleon { stroke: var(--bg); stroke-width: 1.5; }
+.ladder-line { stroke: var(--line); stroke-width: 2; }
+.stop circle { fill: var(--bg); stroke: var(--muted); stroke-width: 2; transition: fill .4s, stroke .4s; }
+.stop.seen circle { fill: var(--muted); }
+.stop.now circle { fill: var(--aqua); stroke: var(--aqua); }
+.stop-name { fill: var(--muted); font-family: var(--font); font-size: 19px; font-weight: 500; transition: fill .4s; }
+.stop.now .stop-name { fill: var(--fg); }
+.stop-size { fill: var(--muted); font-family: var(--font); font-size: 17px; }
+.stop.now .stop-size { fill: var(--aqua); }
+.stop-factor { fill: var(--muted); font-family: var(--font); font-size: 17px; font-style: italic; }
+
+/* ---------- everyday matter ---------- */
+.atom-view, .ptable-view { transition: opacity .7s ease; }
+.ptable-view { opacity: 0; }
+.st-1:not(.st-2) .atom-view { opacity: 0; }
+.st-1:not(.st-2) .ptable-view { opacity: 1; }
+.st-1 .pt-cell { animation: appear-in .4s ease var(--d) backwards; }
+.pt-cell rect { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.pt-cell text { fill: var(--muted); font-family: var(--font); font-size: 15px; }
+.pt-cell.life rect { fill: var(--aqua); fill-opacity: .22; stroke: var(--aqua); }
+.pt-cell.life text { fill: var(--fg); font-weight: 600; }
+.st-2 #matter .electron { filter: drop-shadow(0 0 6px var(--cyan)); }
+.nuc-ring { fill: none; stroke: var(--magenta); stroke-width: 2; stroke-dasharray: 6 6; }
+
+/* ---------- flavour ---------- */
+.gen1-hl { fill: var(--surface); stroke: var(--line); }
+.gen-dot.k-quark { fill: var(--boson); fill-opacity: .3; stroke: var(--boson); stroke-width: 1.5; }
+.gen-dot.k-beauty { fill: var(--aqua); fill-opacity: .35; stroke: var(--aqua); stroke-width: 1.5; }
+.gen-dot.k-lepton { fill: var(--aqua); fill-opacity: .25; stroke: var(--aqua); stroke-width: 1.5; }
+.gen-sym { fill: var(--fg); font-family: var(--font); font-weight: 600; }
+.gen-sym.in { font-size: 20px; }
+.gen-sym.out { font-size: 17px; }
+.gen-mass { fill: var(--muted); font-family: var(--font); font-size: 16px; }
+.decay-arrow { stroke: var(--muted); stroke-width: 1.8; fill: none; }
+.ckm-title { fill: var(--fg); font-family: var(--font); font-size: 18px; font-weight: 500; }
+.ckm-head { fill: var(--fg); font-family: var(--font); font-size: 18px; font-weight: 600; }
+.ckm-head.b { fill: var(--aqua); }
+.ckm-dot { fill: var(--boson); fill-opacity: .6; }
+.ckm-dot.b { fill: var(--aqua); fill-opacity: .75; }
+.ckm-val { fill: var(--muted); font-family: var(--font); font-size: 16px; }
+
+/* ---------- Standard Model ---------- */
+#smtable .sm-part { transition: transform 1.3s cubic-bezier(.55,0,.25,1), opacity .6s ease; }
+.sm-chip { fill: var(--surface); stroke-width: 2.2; }
+.sm-part.k-quark .sm-chip { stroke: var(--boson); }
+.sm-part.k-beauty .sm-chip { stroke: var(--aqua); }
+.sm-part.k-lepton .sm-chip { stroke: var(--aqua); }
+.sm-part.k-boson .sm-chip { stroke: var(--cyan); }
+.sm-part.k-higgs .sm-chip { stroke: var(--aqua); }
+.sm-sym { fill: var(--fg); font-family: var(--font); font-size: 26px; font-weight: 600; }
+.sm-part.k-beauty .sm-sym { fill: var(--aqua); }
+.pname { fill: var(--muted); font-family: var(--font); font-size: 15px; transition: opacity .4s; }
+.st-3 .pname { opacity: 0; }
+.sm-part.anti { opacity: .5; }
+.bracket { fill: none; stroke: var(--aqua); stroke-width: 1.5; }
+.bracket-label { fill: var(--aqua); font-family: var(--font); font-size: 16px; font-weight: 500; }
+
+/* ---------- SM success ---------- */
+.tl-bar { stroke: var(--muted); stroke-width: 2; }
+.tl-pred { fill: var(--bg); stroke: var(--cyan); stroke-width: 2; }
+.tl-found { fill: var(--aqua); }
+.tl-year { fill: var(--muted); font-family: var(--font); font-size: 16px; }
+.tl-year.found { fill: var(--aqua); }
+.panel { fill: none; stroke: var(--line); }
+.st-1 #diphoton .pt { animation: appear-in .35s ease var(--d) backwards; }
+.err { stroke: var(--fg); stroke-opacity: .55; stroke-width: 1.4; }
+.pt-dot { fill: var(--fg); }
+.fit-bkg { fill: none; stroke: var(--muted); stroke-width: 2; }
+.fit-sig { fill: none; stroke: var(--aqua); stroke-width: 2.6; }
+.mh-line { stroke: var(--aqua); stroke-width: 1.2; stroke-dasharray: 4 5; opacity: .7; }
+.mh-label { fill: var(--aqua); font-family: var(--font); font-size: 18px; font-weight: 500; }
+.mh-label.b { fill: var(--magenta); }
+.formula { display: flex; align-items: center; gap: 12px; margin-top: 10px !important; font-size: 23px; }
+.frac { display: inline-flex; flex-direction: column; align-items: center; font-size: 21px; line-height: 1.25; }
+.frac > span:first-child { border-bottom: 1.5px solid var(--fg); width: 100%; text-align: center; }
+.frac > span:last-child { padding: 2px 4px 0; }
+
+/* ---------- SM limits ---------- */
+.seg-ord { stroke: var(--aqua); fill: var(--aqua); }
+.seg-dm { stroke: var(--boson); fill: var(--boson); }
+.seg-de { stroke: var(--cyan); fill: var(--cyan); stroke-opacity: .45; fill-opacity: .45; }
+.seg { fill: none; stroke-width: 40; }
+.present .seg { animation: sweep 1s cubic-bezier(.3,.7,.3,1) var(--d) backwards; }
+@keyframes sweep { from { stroke-dasharray: 0 100; } }
+.swatch { stroke: none; }
+.legend-pct { fill: var(--fg); font-family: var(--font); font-size: 26px; font-weight: 600; }
+.legend-name { fill: var(--fg); font-family: var(--font); font-size: 18px; }
+.dm-gap { fill: var(--boson); fill-opacity: .2; }
+.curve-vis { fill: none; stroke: var(--muted); stroke-width: 2.5; }
+.curve-obs { fill: none; stroke: var(--aqua); stroke-width: 3; }
+.pt-obs { fill: var(--aqua); }
+.err.obs { stroke: var(--aqua); }
+.curve-label { fill: var(--muted); font-family: var(--font); font-size: 17px; }
+.curve-label.obs { fill: var(--aqua); }
+.curve-label.dm { fill: var(--boson); font-size: 18px; font-style: italic; }
+.conclusion { color: var(--aqua); font-weight: 600; font-size: 28px; margin-top: 6px !important; }
+
+/* ---------- beauty quark ---------- */
+.b-glow { stroke: var(--magenta); }
+.lepton.aqua { stroke: var(--aqua); }
+.lepton.dashed { stroke-dasharray: 6 6; }
+.trk-l { fill: none; stroke: var(--aqua); stroke-width: 3; stroke-linecap: round; }
+.bar { transform-box: fill-box; transform-origin: left center; }
+.present .bar { animation: grow 1s cubic-bezier(.3,.7,.3,1) .3s backwards; }
+.present .bar-t { animation: none; }
+.st-1 .bar-t { animation: grow 1.4s cubic-bezier(.3,.7,.3,1) backwards; }
+.bar-p { fill: var(--magenta); }
+.bar-b { fill: var(--aqua); }
+.bar-t { fill: var(--boson); }
+.bar-label { fill: var(--fg); font-family: var(--font); font-size: 17px; }
+
+/* ?still in the URL: show every animation in its end state (screenshots, PDF export) */
+.still .drawon { animation: none !important; stroke-dashoffset: 0; }
+.still .fadein { animation: none !important; opacity: 1; }
+.still .seg, .still .bar, .still .pt, .still .pt-cell, .still .agenda li { animation: none !important; }
+.still .zobj, .still #smtable .sm-part, .still [class*="on-"], .still .dl { transition: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .drawon, .fragment.draw .dl { stroke-dasharray: none; stroke-dashoffset: 0; animation: none !important; transition: none; }
+  .fadein { opacity: 1; animation: none !important; }
+  .present .lat-node.pop { animation: none; }
+  .orbit, .present .seg, .present .bar, .st-1 .pt-cell, .st-1 #diphoton .pt, .present .agenda li { animation: none !important; }
+}
+
+
+/* ---------- three-colour scheme: aquamarine (theme, K/s), hot magenta (b quark, B meson, protons), electric cyan (leptons, electrons) ---------- */
+.text .lead { color: var(--aqua); }
+.chip.star { border-color: var(--magenta); color: var(--magenta); box-shadow: 0 0 18px rgba(255, 67, 200, 0.35); }
+.chip.star b { color: var(--magenta); }
+.quark.q-b { stroke: var(--magenta); } .arrow.a-b { fill: var(--magenta); } .q-label.t-b { fill: var(--magenta); }
+.quark.q-s { stroke: var(--aqua); } .arrow.a-s { fill: var(--aqua); } .q-label.t-s { fill: var(--aqua); }
+.k-glow { stroke: var(--aqua); }
+.lepton, .lepton.aqua { stroke: var(--cyan); } .mu-glow { stroke: var(--cyan); } .mu-label, .c-l { fill: var(--cyan); }
+.trk-mu, .trk-l { stroke: var(--cyan); } .trk-k { stroke: var(--aqua); }
+.boson.photon { stroke: #dfe5f0; }
+.gen-dot.k-quark { fill: var(--aqua); stroke: var(--aqua); }
+.gen-dot.k-beauty { fill: var(--magenta); stroke: var(--magenta); }
+.gen-dot.k-lepton { fill: var(--cyan); stroke: var(--cyan); }
+.sm-part.k-quark .sm-chip { stroke: var(--aqua); } .sm-part.k-lepton .sm-chip { stroke: var(--cyan); }
+.sm-part.k-boson .sm-chip { stroke: var(--boson); } .sm-part.k-higgs .sm-chip { stroke: var(--fg); }
+.sm-part.k-beauty .sm-chip { stroke: var(--magenta); } .sm-part.k-beauty .sm-sym { fill: var(--magenta); }
+.ckm-dot { fill: var(--aqua); } .ckm-dot.b, .ckm-head.b { fill: var(--magenta); }
+.bar-p { fill: var(--boson); } .bar-b { fill: var(--magenta); } .bar-t { fill: var(--aqua); }
+.seg-dm { stroke: var(--magenta); } .dm-gap { fill: var(--magenta); } .curve-label.dm { fill: var(--magenta); }
+.tl-found { fill: var(--aqua); }
+/* flavour figure: larger text */
+#gens .row-label { font-size: 21px; } #gens .gen-head { font-size: 20px; } #gens .gen-mass { font-size: 19px; } #gens .gen-sym.in { font-size: 24px; } #gens .gen-sym.out { font-size: 21px; }
+#gens .ckm-title { font-size: 20px; } #gens .ckm-head { font-size: 22px; } #gens .ckm-val { font-size: 18px; } #gens .svg-caption.small { font-size: 18px; }
+
+/* ---------- formulas: Jost on letters, digits and operators; Greek falls back to KaTeX's fonts ---------- */
+.reveal .katex { font-family: Jost, JostGreek, KaTeX_Main, serif; font-size: 1.08em; }
+.reveal .katex .mathnormal, .reveal .katex .mathit { font-family: Jost, JostGreek, KaTeX_Math, serif; font-style: italic; }
+.reveal .katex .mathrm, .reveal .katex .textrm { font-family: Jost, JostGreek, KaTeX_Main, serif; font-style: normal; }
+.reveal .katex .mathbf, .reveal .katex .textbf { font-family: Jost, JostGreek, KaTeX_Main, serif; font-weight: 600; }
+.formula .katex { font-size: 1.2em; }
+/* roomier text on the lighter slides; symbols in figures set in italic like the equations */
+.text.roomy { gap: 58px; padding-top: 44px; }
+.text.dense.roomy { gap: 46px; padding-top: 30px; }
+#s-limits .text.dense.roomy { gap: 38px; padding-top: 22px; }
+.quark-txt, .sm-sym, .gen-sym, .q-label, .mu-label, .meson-label, .ev-label, .ckm-head, .pname.form, .it { font-style: italic; }
+
+/* ===== type scale: body, quotes and slide numbers = 20 pt (26.667 px); everything smaller = 16 pt (21.333 px) ===== */
+.reveal { font-size: 26.667px; }
+.text, .text.dense { font-size: 26.667px; gap: 24px; padding-top: 20px; }
+.text.tight { gap: 20px; padding-top: 0; }
+.reveal blockquote p { font-size: 26.667px; }
+.reveal blockquote cite { font-size: 21.333px; }
+.reveal .slide-number { font-size: 26.667px; }
+.reveal header { margin-bottom: 14px; }
+.frame { padding-bottom: 34px; }
+.text .lead, .text .aside { font-size: 21.333px; }
+.conclusion, .formula { font-size: 26.667px; }
+.reveal .katex, .formula .katex { font-size: 1em; }
+.title-wrap .author, .title-wrap .affil { font-size: 26.667px; }
+.title-wrap .event, .event-fig figcaption, .divider .part, .legend { font-size: 21.333px; }
+.agenda li { font-size: 26.667px; }
+.row-charge-l { fill: var(--muted); font-family: var(--font); font-size: 23px; }
+.svg-label, .svg-caption, .svg-caption.small, .ev-label, .fig-tag, .row-label, #gens .row-label, .gen-head, #gens .gen-head,
+.gen-head.small, .gen-mass, #gens .gen-mass, .axis-tick, .axis-title, .axis-title.small, .z-note, .stop-name, .stop-size,
+.stop-factor, .pname, .tl-year, .bar-label, .legend-head, .legend-name, .curve-label, .mh-label, .ckm-title, #gens .ckm-title,
+.ckm-val, #gens .ckm-val, #gens .svg-caption.small, .bracket-label { font-size: 23px; }
+.title-wrap .event { letter-spacing: 0.05em; white-space: nowrap; }
+
+
+/* title slide: role line, looping event display */
+.title-wrap .role { font-size: 26.667px; color: var(--aqua); margin-top: -2px; }
+.present .title-wrap .role { animation: appear-in 1s ease 1.2s backwards; }
+#event #ev-prompt, #event #ev-signal { transition: opacity .6s ease; }
+#event.ev-out #ev-prompt, #event.ev-out #ev-signal { opacity: 0; }
+.reveal .slide-number { font-size: 26.667px; }
+#s-success .text.roomy { gap: 52px; padding-top: 26px; }
+#s-beauty .text.roomy { gap: 40px; padding-top: 18px; }
+.still .title-wrap .role { animation: none !important; }
+
+
+/* ---------- part divider: centred title over rising grey bubbles ---------- */
+.s-divider { overflow: hidden; }
+.s-divider .bubbles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.bubble { position: absolute; bottom: -90px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle at 36% 30%, rgba(214, 221, 233, .6), rgba(154, 165, 186, .28) 52%, rgba(154, 165, 186, 0) 74%);
+  filter: blur(var(--b, 2px)); }
+.present .bubble { animation: rise var(--dur) linear var(--delay) infinite; }
+@keyframes rise {
+  0% { transform: translate(0, 0) scale(.85); opacity: 0; }
+  12% { opacity: var(--o); }
+  85% { opacity: var(--o); }
+  100% { transform: translate(var(--sway), -840px) scale(1.08); opacity: 0; }
+}
+.still .bubble { animation: none !important; opacity: var(--o); transform: translate(0, var(--ty)); }
+.divider-center { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.divider-center .part { font-size: 21.333px; font-weight: 500; letter-spacing: .34em; text-transform: uppercase; color: var(--aqua); margin: 0 0 14px; padding-left: .34em; }
+.s-divider .divider-center .divider-title { font-size: 136px; font-weight: 600; letter-spacing: .07em; padding-left: .07em; line-height: 1; margin: 0; text-transform: uppercase; }
+@media (prefers-reduced-motion: reduce) { .present .bubble { animation: none; opacity: var(--o); transform: translate(0, var(--ty)); } }
+
+/* title slide: role + funder in the same grey as the university, shown together with it */
+.title-wrap .role { color: var(--muted); animation: none !important; margin: -2px 0 -4px; line-height: 1.3; }
+.title-wrap .role .dfg { font-size: 21.333px; }
+
+.event-fig svg { overflow: visible; }
+
+/* the quote is white; the text column spreads its paragraphs over the full height next to the figure (adapts to any slide) */
+.reveal blockquote p { color: var(--fg); }
+.reveal .frame .cols { height: 100%; }
+.reveal .frame .cols > .text { justify-content: space-evenly !important; gap: 12px !important; padding-top: 0 !important; padding-bottom: 0 !important; }
+
+/* title slide: university first, then role and funder, all at body size in the same grey */
+.title-wrap .role { margin: 0; line-height: 1.3; }
+.title-wrap .role .dfg { font-size: inherit; }
+
+/* everyday matter: table first, atom after the click */
+.atom-view { opacity: 0; } .ptable-view { opacity: 1; }
+.st-2 .atom-view { opacity: 1; } .st-2 .ptable-view { opacity: 0; }
+.present .pt-cell { animation: appear-in .4s ease var(--d) backwards; }
+.still .pt-cell { animation: none !important; }
+.present #diphoton .pt { animation: appear-in .35s ease var(--d) backwards; }
+.still #diphoton .pt { animation: none !important; }
+
+/* legend squares take the colours of their pie slices */
+.swatch.seg-ord { fill: var(--aqua); stroke: none; }
+.swatch.seg-dm { fill: var(--magenta); stroke: none; }
+.swatch.seg-de { fill: var(--cyan); fill-opacity: .45; stroke: none; }
+
+/* title slide: event line in normal case at body size */
+.title-wrap .event { text-transform: none; letter-spacing: 0; font-size: 26.667px; }
+
+
+/* ===================== Part 2: accelerators ===================== */
+#s-part2 .divider-center .divider-title { font-size: 104px; }
+.s-divider .collisions { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cb-line { fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.cb-in { stroke: var(--boson); stroke-opacity: .5; animation: cb-draw .55s ease-in forwards, cb-fade 1.4s ease 1.7s forwards; }
+.cb-out { stroke-opacity: .6; animation: cb-draw .9s ease-out .5s forwards, cb-fade 1.6s ease 1.9s forwards; }
+.cb-boson { stroke: var(--boson); } .cb-aqua { stroke: var(--aqua); } .cb-cyan { stroke: var(--cyan); } .cb-magenta { stroke: var(--magenta); }
+.cb-flash { fill: #eef1f6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: cb-flash 1s ease .45s forwards; }
+@keyframes cb-draw { to { stroke-dashoffset: 0; } }
+@keyframes cb-fade { to { opacity: 0; } }
+@keyframes cb-flash { 0% { opacity: 0; transform: scale(.4); } 30% { opacity: .85; } 100% { opacity: 0; transform: scale(5); } }
+.still .cb-line { animation: none !important; stroke-dashoffset: 0; opacity: .7; }
+.still .cb-flash { animation: none !important; opacity: 0; }
+
+.pt-m { fill: var(--magenta); } .pt-a { fill: var(--aqua); } .pt-c { fill: var(--cyan); } .pt-g { fill: var(--boson); }
+.flash { fill: #eef1f6; opacity: 0; }
+.c-dim { fill: var(--muted); } .c-photon { fill: #dfe5f0; } .c-lep { fill: var(--cyan); }
+.tube { fill: var(--surface); stroke: var(--line); stroke-width: 2; }
+.plate { fill: rgba(0, 255, 160, .14); stroke: var(--aqua); stroke-width: 2; }
+.magnet { fill: rgba(154, 165, 186, .16); stroke: var(--boson); stroke-width: 2; }
+.plate-sym { fill: var(--fg); font-family: var(--font); font-size: 24px; font-weight: 600; }
+.atom-ring { fill: none; stroke: var(--cyan); stroke-opacity: .35; stroke-width: 1.5; }
+.alpha-track { fill: none; stroke: var(--aqua); stroke-opacity: .25; stroke-width: 2; stroke-dasharray: 6 8; }
+.alpha-track.hit { stroke-opacity: .55; }
+.ring-tube { fill: none; stroke: var(--line); stroke-width: 2; }
+.dipole { fill: rgba(0, 255, 160, .14); stroke: var(--aqua); stroke-width: 2; }
+.quad { fill: rgba(0, 230, 255, .14); stroke: var(--cyan); stroke-width: 2; }
+.rf { fill: var(--magenta); fill-opacity: .3; stroke: var(--magenta); stroke-width: 2; }
+.expt { fill: rgba(0, 255, 160, .2); stroke: var(--aqua); stroke-width: 2; }
+.beam-line { stroke: var(--line); stroke-width: 2; stroke-dasharray: 3 7; }
+.det-ring { fill: none; stroke: var(--boson); stroke-width: 2; }
+.det-ring.thin { stroke-width: 1.2; stroke-opacity: .6; }
+.det-coil { fill: rgba(0, 230, 255, .2); stroke: var(--cyan); stroke-width: 1.5; }
+.person { fill: var(--fg); }
+.person-line { stroke: var(--fg); stroke-width: 1.8; fill: none; stroke-linecap: round; }
+.cone { fill: var(--boson); fill-opacity: .1; }
+.stn { fill: var(--surface); stroke: var(--boson); stroke-width: 1.5; }
+.stn.thick { stroke-width: 2; stroke: var(--cyan); fill: rgba(0, 230, 255, .1); }
+.det-magnet { fill: rgba(0, 255, 160, .12); stroke: var(--aqua); stroke-width: 2; }
+.b-flight { stroke: var(--magenta); stroke-width: 3; }
+.belle-ray { stroke-width: 3; fill: none; stroke-linecap: round; }
+.nu-ray { fill: none; stroke: var(--cyan); stroke-width: 2.5; stroke-dasharray: 7 6; }
+.pile .trk { stroke-opacity: .5; }
