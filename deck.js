@@ -1522,7 +1522,7 @@
         muLabel(d, cx + s * 40, mu - 30, s < 0 ? "end" : "start", sign, { class: "mu-label" });
       });
       el("circle", { cx, cy: mu, r: 4.5, class: "vertex" }, d);
-      txt(d, top ? "rare decay" : "charm loop", { x: cx, y: 246, "text-anchor": "middle", class: "fig-tag", style: top ? "fill:var(--magenta);font-weight:600" : "fill:var(--lime);font-weight:600" });
+      txt(d, top ? "rare decay" : "charm effect", { x: cx, y: 246, "text-anchor": "middle", class: "fig-tag", style: top ? "fill:var(--magenta);font-weight:600" : "fill:var(--lime);font-weight:600" });
     };
     diag(150, true, -27); diag(150, false, 283);
   }
