@@ -1,7 +1,7 @@
 /* Layout: 1280x720 slides; eyebrow + title top-left, text column left, animated SVG figure right.
    Palette is the one fixed on the draft's first slide. Colours carry meaning across the deck:
    orange = beauty quark / muons (the signal), cyan = strange / K meson, magenta = B meson,
-   violet = QCD and gluons, coral = forbidden / tension. */
+   violet = strong interactions and gluons, coral = forbidden / tension. */
 @font-face { font-family: "Jost"; font-style: normal; font-weight: 300 700; font-display: swap;
   src: url("fonts/jost-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
@@ -427,9 +427,9 @@ sup { font-size: .65em; line-height: 0; }
 /* ---------- part divider: centred title over rising grey bubbles ---------- */
 .s-divider { overflow: hidden; }
 .s-divider .bubbles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.bubble { position: absolute; bottom: -90px; border-radius: 50%; opacity: 0;
-  background: radial-gradient(circle at 36% 30%, rgba(214, 221, 233, .6), rgba(154, 165, 186, .28) 52%, rgba(154, 165, 186, 0) 74%);
-  filter: blur(var(--b, 2px)); }
+.bubble { position: absolute; bottom: -90px; width: 28px; height: 28px; border-radius: 50%; opacity: 0;
+  /* a small, softly edged glow: a solid core that fades out only near the rim */
+  background: radial-gradient(circle, rgba(var(--c), .8) 0%, rgba(var(--c), .5) 40%, rgba(var(--c), 0) 72%); }
 .present .bubble { animation: rise var(--dur) linear var(--delay) infinite; }
 @keyframes rise {
   0% { transform: translate(0, 0) scale(.85); opacity: 0; }
@@ -540,11 +540,11 @@ sup { font-size: .65em; line-height: 0; }
 .still .vp-line { stroke-dashoffset: 0; } .still .vp-dot { opacity: .8; }
 
 .text .group .aside { margin-top: 0; }
-.c-np { fill: var(--lime); color: var(--lime); } .c-sm { fill: var(--aqua); } .c-nep { fill: var(--lime); }
+.c-np { fill: var(--lime); color: var(--lime); } .c-sm { fill: var(--magenta); } .c-nep { fill: var(--lime); }
 .boson.np { stroke: var(--lime); stroke-width: 2.6; }
-.fit-sm { fill: none; stroke: var(--aqua); stroke-width: 2.6; }
+.fit-sm { fill: none; stroke: var(--magenta); stroke-width: 2.6; }
 .fit-np { fill: none; stroke: var(--lime); stroke-width: 2.8; }
-.sm-dash { fill: none; stroke: var(--aqua); stroke-width: 1.8; stroke-dasharray: 7 6; }
+.sm-dash { fill: none; stroke: var(--magenta); stroke-width: 1.8; stroke-dasharray: 7 6; }
 .dev-line { fill: none; stroke: var(--lime); stroke-width: 2; }
 .frac-line { stroke: var(--fg); stroke-width: 1.5; }
 .sun { fill: var(--orange); }
@@ -574,3 +574,156 @@ sup { font-size: .65em; line-height: 0; }
   .seq { opacity: 1; animation: none !important; } .late { transition: none; }
   .st-1 #np .rbar, .present .fadeaway { animation: none !important; } .fadeaway { opacity: 0; }
 }
+
+/* title slide: website link in grey under the name */
+.title-wrap .web { font-size: 26.667px; margin: -6px 0 0; }
+.title-wrap .web a { color: var(--muted); text-decoration: none; }
+.title-wrap .web a:hover { color: var(--aqua); text-decoration: underline; }
+
+/* the deviation bracket appears 3 s after the click, once the measurements have come in */
+.st-1 .dev-late { transition-delay: 3s; }
+
+
+/* penguin: the loop is drawn 1.6 s after the click (after the "forbidden" jump has been shown) */
+.fragment.draw[style*="--dly"] .dl { transition-delay: var(--dly); }
+.fragment.draw[style*="--dly"] text, .fragment.draw[style*="--dly"] circle, .fragment.draw[style*="--dly"] .arrow { transition-delay: calc(var(--dly) + .6s); }
+/* the "forbidden" label at the same 16 pt as the other figure labels */
+.forbid-label { font-size: 23px; }
+
+/* penguin: the glow on the muons and the kaon comes only after the muon lines have been drawn (1.1 s), then fades in slowly */
+#penguin g.fragment:has(> .mu-glow) { transition: opacity .9s ease 1.9s; }
+
+
+/* ===================== Part 4: calculations ===================== */
+#s-part4 .divider-center .divider-title { font-size: 104px; }
+.formulas { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.ff { position: absolute; white-space: nowrap; font-size: 25px; opacity: 0; }
+.present .ff { animation: ff-drift var(--dur) ease-in-out var(--delay) infinite; }
+@keyframes ff-drift {
+  0% { opacity: 0; transform: translateY(22px); }
+  22% { opacity: var(--o); }
+  78% { opacity: var(--o); }
+  100% { opacity: 0; transform: translateY(-26px); }
+}
+.still .ff { animation: none !important; opacity: var(--o); }
+@media (prefers-reduced-motion: reduce) { .present .ff { animation: none; opacity: var(--o); } }
+.bracket { fill: none; stroke: var(--aqua); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sbar { transform-box: fill-box; transform-origin: 50% 100%; }
+.present .sbar:not(.late) { animation: growy .9s cubic-bezier(.3,.7,.3,1) var(--d) backwards; }
+.st-1 .sbar.late { animation: growy .9s cubic-bezier(.3,.7,.3,1) var(--d) backwards; }
+@keyframes growy { from { transform: scaleY(0); } }
+.still .sbar { animation: none !important; }
+.sr-loop { fill: none; stroke: var(--aqua); stroke-width: 2.6; }
+.sr-peak { fill: var(--magenta); fill-opacity: .55; stroke: var(--magenta); stroke-width: 2; }
+.sr-cont { fill: var(--boson); fill-opacity: .28; stroke: none; }
+.sr-unc { fill: none; stroke: var(--cyan); stroke-width: 1.6; stroke-dasharray: 6 6; }
+.wob { transform-box: fill-box; transform-origin: 50% 100%; animation: wobble 3.4s ease-in-out infinite alternate; }
+@keyframes wobble { from { transform: scaleY(.9); } to { transform: scaleY(1.1); } }
+.still .wob { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .wob { animation: none; } }
+
+/* lattice caption clear of the grid; the equations stay smaller so they never cover the title */
+#s-lattice #snap-count { transform: translateY(14px); }
+.ff { font-size: 23px; }
+
+
+/* ===================== Part 5: predictions ===================== */
+#s-part5 .divider-center .divider-title { font-size: 104px; }
+.ff svg { display: block; overflow: visible; }
+.hl-cyan { color: var(--cyan); font-weight: 600; }
+.comb-band { fill: var(--magenta); fill-opacity: .26; stroke: none; }
+.charm-loop { stroke: var(--lime); }
+.signal { fill: var(--magenta); fill-opacity: .8; stroke: none; }
+.resonance { fill: var(--lime); fill-opacity: .5; stroke: var(--lime); stroke-width: 1.6; }
+.res-band { fill: var(--boson); fill-opacity: .14; stroke: none; }
+.sm-box { fill: var(--magenta); fill-opacity: .3; stroke: var(--magenta); stroke-width: 1.6; }
+.fork-bar { stroke: var(--fg); stroke-width: 6; stroke-linecap: round; fill: none; }
+.fork-string { stroke: var(--muted); stroke-width: 2; fill: none; }
+.fork-pan { fill: var(--surface); stroke: var(--boson); stroke-width: 2.4; }
+.fork-base { fill: var(--surface); stroke: var(--boson); stroke-width: 2.4; }
+.fork-beam, .fork-pan-l, .fork-pan-r { transform-box: view-box; transition: transform .9s ease; }
+.fork-beam { transform-origin: 300px 150px; transform: rotate(-7deg); }
+.fork-pan-l { transform: translateY(23px); }
+.fork-pan-r { transform: translateY(-23px); }
+/* the balance swings once, with ever smaller swings, and comes to rest in equilibrium */
+.st-1 .fork-beam { animation: fork-tilt 5s ease-in-out .9s both; }
+.st-1 .fork-pan-l { animation: fork-l 5s ease-in-out .9s both; }
+.st-1 .fork-pan-r { animation: fork-r 5s ease-in-out .9s both; }
+@keyframes fork-tilt { 0% { transform: rotate(-7deg); } 22% { transform: rotate(5.5deg); } 44% { transform: rotate(-3.5deg); } 64% { transform: rotate(2deg); } 82% { transform: rotate(-.8deg); } 100% { transform: rotate(0deg); } }
+@keyframes fork-l { 0% { transform: translateY(23px); } 22% { transform: translateY(-18px); } 44% { transform: translateY(11.5px); } 64% { transform: translateY(-6.5px); } 82% { transform: translateY(2.6px); } 100% { transform: translateY(0); } }
+@keyframes fork-r { 0% { transform: translateY(-23px); } 22% { transform: translateY(18px); } 44% { transform: translateY(-11.5px); } 64% { transform: translateY(6.5px); } 82% { transform: translateY(-2.6px); } 100% { transform: translateY(0); } }
+.still .fork-beam { animation: none !important; transform: none; }
+.still .fork-pan-l, .still .fork-pan-r { animation: none !important; transform: none; }
+@media (prefers-reduced-motion: reduce) { .st-1 .fork-beam, .st-1 .fork-pan-l, .st-1 .fork-pan-r { animation: none; transform: none; } }
+
+
+/* ---------- Predictions divider: a wall of tables with coloured plots over it ---------- */
+.wall { position: absolute; inset: 0; overflow: hidden; }
+.wcol { position: absolute; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent), linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent), linear-gradient(to right, transparent, #000 10%, #000 90%, transparent); }
+.wscroll { font-family: var(--font); font-variant-numeric: tabular-nums; color: rgba(154, 165, 186, .5); white-space: pre; font-size: 14px; line-height: 1.5; }
+.present .wscroll { animation: wall-up var(--dur) linear var(--start) infinite; }
+@keyframes wall-up { to { transform: translateY(-50%); } }
+.wcap { font-weight: 600; color: rgba(154, 165, 186, .72); margin-top: 6px; white-space: normal; }
+.whead { color: rgba(154, 165, 186, .62); border-bottom: 1px solid rgba(154, 165, 186, .22); padding-bottom: 3px; margin-bottom: 3px; }
+.wrow { transition: color .6s ease; }
+.wrow.hot { color: rgba(238, 241, 246, .95); transition: color .15s ease; }
+.wgap { height: 22px; }
+.still .wscroll { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .present .wscroll { animation: none; } }
+.plots { position: absolute; inset: 0; pointer-events: none; }
+.pcard { position: absolute; width: 330px; height: 210px; padding: 6px; box-sizing: content-box; background: none; opacity: 0; }
+.pcard svg { display: block; overflow: visible; }
+.pa { left: 40px; top: 36px; } .pb { right: 44px; top: 120px; } .pc { left: 300px; bottom: 34px; }
+.present .pcard { animation: pcard 15s ease-in-out var(--pd) infinite; }
+@keyframes pcard { 0% { opacity: 0; transform: scale(.94); } 10% { opacity: .62; transform: scale(1); } 52% { opacity: .62; } 66%, 100% { opacity: 0; transform: scale(1.03); } }
+.still .pcard { animation: none !important; opacity: .62; }
+@media (prefers-reduced-motion: reduce) { .present .pcard { animation: none; opacity: .62; } }
+.scrim { position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(ellipse 54% 22% at 50% 50%, rgba(13, 16, 22, .94) 46%, rgba(13, 16, 22, 0) 100%); }
+
+
+/* ===================== outline, conclusion, thank you ===================== */
+.outline-wrap { align-self: center; padding-left: 80px; display: flex; flex-direction: column; gap: 34px; z-index: 1; }
+.outline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
+.outline li { display: grid; grid-template-columns: 46px auto; grid-template-rows: auto auto; row-gap: 2px; }
+.outline .n { grid-row: 1 / span 2; font-size: 26.667px; font-weight: 600; color: var(--aqua); }
+.outline .nm { font-size: 26.667px; font-weight: 600; color: var(--fg); }
+.outline .ds { font-size: 21.333px; color: var(--muted); }
+.present .outline li { animation: appear-in .6s ease var(--d) backwards; }
+.still .outline li { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .present .outline li { animation: none; } }
+
+/* the event display of the title slide, also on the outline and the take-home slide */
+.ev-svg > g { transition: opacity .6s ease; }
+.ev-svg.ev-out > g:nth-child(n+2) { opacity: 0; }
+.ev-svg .trk-k { stroke: var(--aqua); }
+#event-take .ev-label { font-size: 30px; }
+
+/* Conclusion divider: tracks come in from all sides */
+#s-part6 .divider-center .divider-title { font-size: 104px; }
+.s-divider .converge { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cv-line { fill: none; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+.present .cv-line { animation: cv-in var(--dur) ease-in-out var(--delay) infinite; }
+@keyframes cv-in { 0% { stroke-dashoffset: 1; opacity: 0; } 8% { opacity: var(--o); } 55% { stroke-dashoffset: 0; opacity: var(--o); } 100% { stroke-dashoffset: 0; opacity: 0; } }
+.still .cv-line { animation: none !important; stroke-dashoffset: 0; opacity: var(--o); }
+@media (prefers-reduced-motion: reduce) { .present .cv-line { animation: none; stroke-dashoffset: 0; opacity: var(--o); } }
+
+/* thank you: now and then one letter lights up */
+#s-end .divider-center .divider-title { font-size: 120px; }
+.tl { transition: color .6s ease; }
+/* the title/outline event display sits outside the slides: it fades in on the title, stays through the outline and fades out after */
+.reveal .slides > .event-shared { position: absolute; left: 640px; top: 0; width: 640px; height: 720px; margin: 0; opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+.reveal.show-event .slides > .event-shared { opacity: 1; }
+.show-event .event-shared .drawon { animation: draw var(--dur, 1s) cubic-bezier(.3,.7,.3,1) var(--d, 0s) forwards; }
+.show-event .event-shared .fadein { animation: appear .6s ease var(--d, 0s) forwards; }
+.still .event-shared .drawon { animation: none !important; stroke-dashoffset: 0; }
+.still .event-shared .fadein { animation: none !important; opacity: 1; }
+/* take-home slide: the plot of slide 28 is shown complete (measurements and legend included) */
+#tension-take .on-1 { opacity: 1; }
+
+
+/* part of a conclusion line in plain text */
+.conclusion .plain { color: var(--fg); font-weight: 350; }

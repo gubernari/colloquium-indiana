@@ -69,7 +69,7 @@
   const PAIRS = [[0, 1], [1, 2], [2, 0]];
   const hadrons = [];
   // flavours: "~u" is an antiquark (drawn with a bar); positions: optional [dx, dy] per quark
-  function makeHadron(g, cx, cy, R, flavours, { spread = 58, qr = 27, amp = 9, colours = CHARGE, pairs = PAIRS, positions = null } = {}) {
+  function makeHadron(g, cx, cy, R, flavours, { spread = 58, qr = 27, amp = 9, colours = CHARGE, pairs = PAIRS, positions = null, noswap = false } = {}) {
     if (!g) return;
     el("circle", { cx, cy, r: R, class: "hadron" }, g);
     const springs = pairs.map(() => el("path", { class: "gluon" }, g));
@@ -87,7 +87,7 @@
     const coilR = qr * 0.3;
     // loop count fixed from the rest positions, so the wobble only stretches each spring
     const loops = pairs.map(([i, j]) => coilLoops(Math.hypot(quarks[j].base[0] - quarks[i].base[0], quarks[j].base[1] - quarks[i].base[1]), coilR));
-    const h = { section: g.closest("section"), quarks, springs, amp, coilR, loops, pairs, colours };
+    const h = { section: g.closest("section"), quarks, springs, amp, coilR, loops, pairs, colours, noswap };
     hadrons.push(h);
     drawHadron(h, 0);
   }
@@ -104,7 +104,7 @@
     });
   }
   function swapColour() {
-    const live = hadrons.filter((h) => h.section?.classList.contains("present"));
+    const live = hadrons.filter((h) => h.section?.classList.contains("present") && !h.noswap);
     if (reduce || !live.length) return;
     const h = live[Math.floor(Math.random() * live.length)];
     const k = Math.floor(Math.random() * h.pairs.length), [i, j] = h.pairs[k];
@@ -156,9 +156,10 @@
                  class: `${cls} drawon`, pathLength: 1, style: `--d:${delay}s;--dur:${dur}s` }, parent);
     return e;
   }
-  function buildEventFrame() {
-    const prompt = $("#ev-prompt"), sig = $("#ev-signal");
-    if (!prompt) return;
+  // an event display is an svg with three groups: rings, prompt tracks, the rare decay (svg._only: always the same decay)
+  function buildEventFrame(svg) {
+    if (!svg) return;
+    const prompt = svg.children[1], sig = svg.children[2];
     prompt.replaceChildren();
     sig.replaceChildren();
     const rnd = Math.random;
@@ -167,7 +168,8 @@
     }
     el("circle", { cx: EV_PV[0], cy: EV_PV[1], r: 5, class: "pv" }, prompt);
 
-    const d = EV_DECAYS[evCount++ % EV_DECAYS.length];
+    svg._n = (svg._n || 0) + 1;
+    const d = svg._only ? EV_DECAYS[0] : EV_DECAYS[(svg._n - 1) % EV_DECAYS.length];
     const th = rnd() * 2 * Math.PI, dist = 70 + rnd() * 50, s = rnd() < 0.5 ? -1 : 1;
     const SV = [EV_PV[0] + dist * Math.cos(th), EV_PV[1] + dist * Math.sin(th)];
     const legs = [
@@ -187,19 +189,23 @@
     const nx = -Math.sin(th) * -s, ny = Math.cos(th) * -s;
     evLabel(sig, d.parent, (EV_PV[0] + SV[0]) / 2 + 24 * nx, (EV_PV[1] + SV[1]) / 2 + 24 * ny + 7, "--magenta", "middle", 2.1);
   }
+  // the same display on the title slide, the outline and (always B → K μ⁺μ⁻) the take-home slide
   function buildEvent() {
-    const svg = $("#event");
-    if (!svg) return;
-    const rings = svg.querySelector("#ev-rings");
-    [70, 140, 220].forEach((r) => el("circle", { cx: EV_PV[0], cy: EV_PV[1], r, class: "ring" }, rings));
-    el("circle", { cx: EV_PV[0], cy: EV_PV[1], r: 292, class: "ring outer" }, rings);
-    buildEventFrame();
-    if (reduce) return;
-    setInterval(() => {
-      if (!isPresent("s-title")) return;
-      svg.classList.add("ev-out");
-      setTimeout(() => { buildEventFrame(); svg.classList.remove("ev-out"); }, 650);
-    }, 5400);
+    [["event", ["s-title", "s-outline"], false]].forEach(([id, sections, only]) => {
+      const svg = document.getElementById(id);
+      if (!svg) return;
+      svg._only = only;
+      const rings = svg.children[0];
+      [70, 140, 220].forEach((r) => el("circle", { cx: EV_PV[0], cy: EV_PV[1], r, class: "ring" }, rings));
+      el("circle", { cx: EV_PV[0], cy: EV_PV[1], r: 292, class: "ring outer" }, rings);
+      buildEventFrame(svg);
+      if (reduce) return;
+      setInterval(() => {
+        if (!sections.some(isPresent)) return;
+        svg.classList.add("ev-out");
+        setTimeout(() => { buildEventFrame(svg); svg.classList.remove("ev-out"); }, 650);
+      }, 5400);
+    });
   }
 
   /* ---------------- what everything is made of: the zoom ---------------- */
@@ -596,9 +602,9 @@
   function buildPenguin() {
     const w = $("#w-boson"), ph = $("#photon");
     if (!w) return;
-    const P0 = [200, 270], C = [300, 50], P2 = [400, 270];
-    const bez = (t) => [0, 1].map((k) => (1 - t) ** 2 * P0[k] + 2 * (1 - t) * t * C[k] + t * t * P2[k]);
-    w.setAttribute("d", wavy(bez, 9, 6));
+    // a rounded arch (half ellipse), so the wiggle keeps an even wavelength all the way round
+    const arch = (t) => [300 - 100 * Math.cos(Math.PI * t), 270 - 110 * Math.sin(Math.PI * t)];
+    w.setAttribute("d", wavy(arch, 8, 6, 300));
     ph.setAttribute("d", wavy(line(300, 160, 300, 72), 4.5, 6));
   }
   const lat = { coarse: [], fine: [], count: 0, active: false };
@@ -632,7 +638,6 @@
       }
     }
     lat.count += 1;
-    $("#snap-count").textContent = `gluon field · snapshot ${lat.count.toLocaleString("en-US")}`;
   }
 
   /* ---------------- stages: text fragments drive the figures ---------------- */
@@ -799,7 +804,7 @@
     }
     // synchrotron radiation: light leaves tangentially at the bends
     const rad = el("g", { class: "on-1" }, g);
-    [337.5, 22.5, 67.5, 112.5].forEach((a) => {
+    [22.5, 112.5, 202.5, 292.5].forEach((a) => {   // every second dipole
       const [x, y] = polar(C, R + 14, a), t = [-Math.sin(a * Math.PI / 180), Math.cos(a * Math.PI / 180)];
       el("path", { d: wavy(line(x, y, x + 62 * t[0], y + 62 * t[1]), 4, 4, 60), class: "boson photon" }, rad);
     });
@@ -808,11 +813,10 @@
     const path = `M${C[0]} ${C[1] - R} A${R} ${R} 0 1 1 ${C[0] - 0.1} ${C[1] - R}`;
     [0, -2.5].forEach((b) => motion(dot(g, 9, "pt-m"), path, 5, b));
     const lg = el("g", { class: "on-1" }, g);
-    el("rect", { x: 20, y: 440, width: 34, height: 24, rx: 4, class: "dipole" }, lg);
-    txt(lg, "dipole: bends", { x: 66, y: 460, class: "fig-tag" });
-    el("rect", { x: 300, y: 440, width: 24, height: 24, rx: 3, class: "quad" }, lg);
-    txt(lg, "quadrupole: focuses", { x: 336, y: 460, class: "fig-tag" });
-    txt(lg, "synchrotron radiation", { x: 590, y: 512, "text-anchor": "end", class: "fig-tag c-photon" });
+    el("rect", { x: 20, y: 478, width: 34, height: 24, rx: 4, class: "dipole" }, lg);
+    txt(lg, "dipole: bends", { x: 66, y: 498, class: "fig-tag" });
+    el("rect", { x: 300, y: 478, width: 24, height: 24, rx: 3, class: "quad" }, lg);
+    txt(lg, "quadrupole: focuses", { x: 336, y: 498, class: "fig-tag" });
   }
 
   /* ---- the LHC ring: two loops, then the beams collide at ATLAS and vanish ---- */
@@ -1142,12 +1146,12 @@
       const u = 0.08 + 0.12 * i, v = 0.3 + 0.04 * Math.sin(1.7 * i) + 0.06 * u, e = 0.055, hw = 0.045;
       const p = el("g", { class: "seq", style: `--d:${(1 + 0.12 * i).toFixed(2)}s` }, ig);
       const x = iu(u), y = iv(v), y1 = iv(v - e), y2 = iv(v + e);
-      el("path", { d: `M${f(iu(u - hw))} ${f(y)} H${f(iu(u + hw))} M${f(x)} ${f(y1)} V${f(y2)} M${f(x - 5)} ${f(y1)} h10 M${f(x - 5)} ${f(y2)} h10`, class: "err" }, p);
+      el("path", { d: `M${f(iu(u - hw))} ${f(y)} H${f(iu(u + hw))} M${f(x)} ${f(y1)} V${f(y2)}`, class: "err" }, p);
       el("circle", { cx: f(x), cy: f(y), r: 3, class: "pt-dot" }, p);
     }
     txt(ig, "measurements", { x: f(iu(0.3)), y: f(iv(0.1)), "text-anchor": "middle", class: "fig-tag seq", style: "--d:2s" });   // below the points
-    // with the last click: the gap between data and prediction is the hint
-    const dev = el("g", { class: "on-2" }, ig);
+    // at the end of the indirect-search animation (a moment after the points are in): the gap between data and prediction is the hint
+    const dev = el("g", { class: "on-1 dev-late" }, ig);
     const xd = iu(0.99), ya = iv(c(0.97) - w(0.97)), yb = iv(0.38);
     el("path", { d: `M${f(xd)} ${f(ya)} V${f(yb)} M${f(xd - 6)} ${f(ya)} h12 M${f(xd - 6)} ${f(yb)} h12`, class: "dev-line" }, dev);
     txt(dev, "deviation?", { x: f(xd - 12), y: f(yb - 14), "text-anchor": "end", class: "fig-tag c-np" });   // below the band, above the data
@@ -1234,11 +1238,6 @@
       txt(chip, sym, { "text-anchor": "middle", dy: 9, class: "sm-sym" });
       txt(found, String(b), { x: xb + 30, y: y + 7, class: "tl-year found" });
     });
-    el("circle", { cx: 36, cy: 476, r: 7, class: "tl-pred" }, g);
-    txt(g, "predicted", { x: 52, y: 483, class: "fig-tag c-dim" });
-    el("path", { d: "M164 476 H198", class: "decay-arrow", "marker-end": "url(#arrow-head)" }, g);
-    el("circle", { cx: 224, cy: 476, r: 12, class: "mini-chip" }, g);
-    txt(g, "found", { x: 246, y: 483, class: "fig-tag c-dim" });
   }
 
   /* ---- rare decays and new particles: b -> s through a heavy Z', and the mass reach ---- */
@@ -1285,6 +1284,481 @@
     });
   }
 
+  /* ================= Part 4: calculations ================= */
+  // pairs of a quark and an antiquark that pop in and out of existence inside a hadron
+  function seaPairs(parent, cx, cy, R, n, rand) {
+    for (let i = 0; i < n; i++) {
+      let x, y;
+      do {
+        const a = rand() * 2 * Math.PI, r = 40 + rand() * (R - 40 - 26);
+        x = Math.cos(a) * r; y = Math.sin(a) * r;
+      } while (Math.abs(x) < 86 && Math.abs(y) < 52);       // keep clear of the two valence quarks
+      const p = el("g", { transform: `translate(${f(cx + x)} ${f(cy + y)}) rotate(${f(rand() * 180)})`, opacity: 0 }, parent);
+      el("path", { d: coil(-9, 0, 9, 0, 3.2, 40), class: "gluon" }, p);
+      el("circle", { cx: -9, cy: 0, r: 5.5, fill: "var(--boson)" }, p);
+      el("circle", { cx: 9, cy: 0, r: 5.5, fill: "var(--cyan)" }, p);
+      const dur = 3 + rand() * 3;
+      pulse(p, "opacity", "0;0;1;1;0", "0;0.08;0.2;0.75;1", dur, -(rand() * dur));
+    }
+  }
+
+  /* ---- measure mesons: B -> K mu mu, and the swarm inside each meson ---- */
+  function buildMeasure() {
+    const g = $("#measure");
+    if (!g) return;
+    const rand = rng(11), B = [150, 250], K = [450, 250], R = 118;
+    makeHadron(el("g", {}, g), B[0], B[1], R, ["b", "~u"], { colours: ["var(--magenta)", "var(--cyan)"], pairs: [[0, 1]], positions: [[-38, 6], [38, -6]], qr: 30, amp: 7, noswap: true });
+    makeHadron(el("g", {}, g), K[0], K[1], R, ["s", "~u"], { colours: ["var(--aqua)", "var(--cyan)"], pairs: [[0, 1]], positions: [[-38, 6], [38, -6]], qr: 30, amp: 7, noswap: true });
+    mixed(g, { x: B[0], y: 402, "text-anchor": "middle", class: "fig-tag" }, [["B", 1], [" meson", 0]]);
+    mixed(g, { x: K[0], y: 402, "text-anchor": "middle", class: "fig-tag" }, [["K", 1], [" meson", 0]]);
+    // the quark transition b -> s with the muon pair
+    el("path", { d: "M274 250 H326", class: "decay-arrow", "marker-end": "url(#arrow-head)" }, g);
+    el("path", { d: wavy(line(300, 250, 300, 108), 4, 6), class: "boson" }, g);
+    [[236, 44], [364, 44]].forEach(([x, y]) => el("path", { d: `M300 108 L${x} ${y}`, class: "lepton" }, g));
+    el("circle", { cx: 300, cy: 108, r: 5, class: "vertex" }, g);
+    [[224, 52, "end", "+"], [376, 52, "start", "−"]].forEach(([x, y, anchor, sign]) => {
+      const t = txt(g, "μ", { x, y, "text-anchor": anchor, class: "mu-label" });
+      el("tspan", { "baseline-shift": "super", "font-size": "70%", style: "font-style:normal" }, t).textContent = sign;
+    });
+    // with the click: the swarm of gluons and pairs, and the object we need to compute
+    const sea = el("g", { class: "on-1" }, g);
+    seaPairs(sea, B[0], B[1], R, 9, rand);
+    seaPairs(sea, K[0], K[1], R, 9, rand);
+    el("path", { d: `M${B[0]} 424 V440 H${K[0]} V424`, class: "bracket" }, sea);
+    txt(sea, "hadronic matrix element", { x: 300, y: 478, "text-anchor": "middle", class: "fig-tag", style: "fill:var(--aqua);font-weight:600" });
+  }
+
+  /* ---- beyond perturbation theory: the terms of a series ---- */
+  function buildSeries() {
+    const g = $("#series");
+    if (!g) return;
+    const panel = (parent, y0, vals, colour, verdict, late) => {
+      const base = y0 + 150, H = 100;
+      el("path", { d: `M44 ${base} H560`, class: "axis-line" }, parent);
+      vals.forEach(([v, lab], i) => {
+        const h = Math.max(2, H * v), x = 60 + i * 100;
+        el("rect", { x, y: f(base - h), width: 58, height: f(h), rx: 3, class: "sbar" + (late ? " late" : ""), style: `fill:${colour};--d:${(0.2 + i * 0.16).toFixed(2)}s` }, parent);
+        const t = txt(parent, lab[0], { x: x + 29, y: f(base - h - 10), "text-anchor": "middle", class: "fig-tag" });
+        if (lab[1]) el("tspan", { "baseline-shift": "super", "font-size": "70%" }, t).textContent = lab[1];
+      });
+      txt(parent, "…", { x: 60 + vals.length * 100 + 4, y: base - 4, class: "fig-tag" });
+      txt(parent, verdict, { x: 300, y: base + 36, "text-anchor": "middle", class: "fig-tag", style: `fill:${colour};font-weight:600` });
+    };
+    mixed(g, { x: 44, y: 40, class: "fig-tag" }, [["QED: ", 0], ["α", 1], [" ≈ 1/137", 0]]);
+    panel(g, 40, [[1, ["1"]], [0.01, ["10", "−2"]], [0.0001, ["10", "−4"]], [0.000001, ["10", "−6"]]], "var(--aqua)", "good convergence", false);
+    const q = el("g", { class: "on-1" }, g);
+    const t = txt(q, "strong force in a meson: ", { x: 44, y: 326, class: "fig-tag" });
+    el("tspan", { style: "font-style:italic" }, t).textContent = "α";
+    el("tspan", { dy: "0.2em", "font-size": "72%", style: "font-style:italic" }, t).textContent = "s";   // a modest drop: the default subscript sits too low
+    el("tspan", { dy: "-0.2em" }, t).textContent = " ≈ 1";
+    panel(q, 326, [[1, ["1"]], [0.8, ["0.8"]], [0.7, ["0.7"]], [0.65, ["0.65"]], [0.6, ["0.6"]]], "var(--magenta)", "bad convergence", true);
+  }
+
+  /* ---- sum rules: the same quantity, computed with quarks and gluons and as a sum over hadrons ---- */
+  function buildSumRules() {
+    const g = $("#sumrules");
+    if (!g) return;
+    // left: a quark loop with a gluon (perturbation theory)
+    txt(g, "quarks and gluons", { x: 140, y: 120, "text-anchor": "middle", class: "fig-tag", style: "fill:var(--aqua);font-weight:600" });
+    txt(g, "short distances: calculable", { x: 140, y: 152, "text-anchor": "middle", class: "fig-tag c-dim" });
+    el("circle", { cx: 140, cy: 270, r: 72, class: "sr-loop" }, g);
+    el("path", { d: wavy(line(140, 200, 140, 340), 5, 7), class: "boson" }, g);
+    // two external lines, both pointing away from the loop; the vertices sit on the circle
+    [[68, -1], [212, 1]].forEach(([x, dir]) => { el("path", { d: `M${x} 270 H${x + dir * 36}`, class: "sr-loop" }, g); el("circle", { cx: x, cy: 270, r: 9, class: "vertex" }, g); });
+    // the two descriptions are equal
+    const eq = el("g", { class: "on-1" }, g);
+    txt(eq, "=", { x: 300, y: 292, "text-anchor": "middle", style: "fill:var(--fg);font-size:64px;font-weight:300;font-family:var(--font)" });
+    // right: the same quantity as a sum over hadronic states
+    txt(eq, "hadrons", { x: 460, y: 120, "text-anchor": "middle", class: "fig-tag", style: "fill:var(--magenta);font-weight:600" });
+    mixed(eq, { x: 460, y: 152, "text-anchor": "middle", class: "fig-tag c-dim" }, [["K", 1], [" meson + heavier states", 0]]);
+    const base = 340, x0 = 340, x1 = 580;
+    el("path", { d: `M${x0} ${base} V190`, class: "axis-line", "marker-end": "url(#arrow-head)" }, eq);
+    el("path", { d: `M${x0} ${base} H${x1 + 6}`, class: "axis-line", "marker-end": "url(#arrow-head)" }, eq);
+    let peak = "";
+    for (let x = 352; x <= 402; x += 1) peak += (peak ? "L" : "M") + x + " " + f(base - 130 * Math.exp(-(((x - 377) / 6) ** 2) / 2));
+    el("path", { d: peak + `L402 ${base} L352 ${base}Z`, class: "sr-peak" }, eq);
+    mixed(eq, { x: 396, y: 200, class: "fig-tag", style: "fill:var(--magenta)" }, [["K", 1], [" meson", 0]]);
+    let cont = `M440 ${base}`;
+    for (let x = 440; x <= 572; x += 4) cont += `L${x} ${f(base - 62 * (1 - Math.exp(-(x - 440) / 22)))}`;
+    const wob = el("g", { class: "wob" }, eq);
+    el("path", { d: cont + `L572 ${base}Z`, class: "sr-cont" }, wob);
+    el("path", { d: cont.replace(/L(\d+) /g, (m, x) => `L${x} `) , class: "sr-unc" }, wob);
+    txt(eq, "heavier states", { x: 510, y: 262, "text-anchor": "middle", class: "fig-tag c-dim" });
+    txt(eq, "uncertain", { x: 510, y: 402, "text-anchor": "middle", class: "fig-tag", style: "fill:var(--cyan);font-style:italic" });
+    el("path", { d: "M510 374 V352", class: "decay-arrow", "marker-end": "url(#arrow-head)" }, eq);
+    txt(eq, "mass", { x: 580, y: 370, "text-anchor": "end", class: "fig-tag c-dim" });
+  }
+
+  /* ---- divider: equations from the paper drifting in the background ---- */
+  const PAPER_EQS = [
+    String.raw`\mathcal{O}_2^q=(\bar{s}_L\gamma_\mu q_L)(\bar{q}_L\gamma^\mu b_L)`,
+    String.raw`\mathcal{F}^{B\to P}_{0}=f_{+}^{B\to P}`,
+    String.raw`\mathcal{F}^{B\to P}_{t}=f_{0}^{B\to P}`,
+    String.raw`\mathcal{F}^{B\to P}_{T,0}=\frac{q^2}{M_B(M_B+M_K)}f_T^{B\to P}`,    String.raw`\mathcal{L}_{\rm WET}^{sb\ell\ell}=\mathcal{L}_{\mathrm{QED}}+\mathcal{L}_{\mathrm{QCD}}+\mathcal{L}_{D=6}^{sb\ell\ell}`,
+    String.raw`\mathcal{O}_1^q=(\bar{s}_L\gamma_\mu T^a q_L)(\bar{q}_L\gamma^\mu T^a b_L)`,
+    String.raw`\mathcal{O}_7=\frac{e}{16\pi^2}m_b(\bar{s}_L\sigma^{\mu\nu}b_R)F_{\mu\nu}`,
+    String.raw`\mathcal{O}_9^{\ell}=\frac{e^2}{16\pi^2}(\bar{s}_L\gamma_\mu b_L)(\bar{\ell}\gamma^\mu\ell)`,
+    String.raw`\mathcal{O}_{10}^{\ell}=\frac{e^2}{16\pi^2}(\bar{s}_L\gamma_\mu b_L)(\bar{\ell}\gamma^\mu\gamma_5\ell)`,
+    String.raw`\mathcal{F}^{B\to M}_{\mu}(k,q)\equiv\langle M(k)|\bar{s}\gamma_{\mu}P_{L}\,b|\bar{B}(q+k)\rangle`,
+    String.raw`\mathcal{F}^{B\to M}_{T,\mu}(k,q)\equiv\langle M(k)|\bar{s}\sigma_{\mu\nu}q^{\nu}P_{R}\,b|\bar{B}(q+k)\rangle`,
+    String.raw`z(q^2)\equiv\frac{\sqrt{s_+-q^2}-\sqrt{s_+-s_0}}{\sqrt{s_+-q^2}+\sqrt{s_+-s_0}}`,
+    String.raw`\hat{z}(q^2)\equiv\frac{\sqrt{\hat{s}_+-q^2}-\sqrt{\hat{s}_+-\hat{s}_0}}{\sqrt{\hat{s}_+-q^2}+\sqrt{\hat{s}_+-\hat{s}_0}}`,
+    String.raw`\hat{\mathcal{H}}^{B\to M}_{\lambda}(\hat{z})=\sum_{n=0}^{\infty}\beta_{\lambda,n}^{B\to M}p_n(\hat{z})`,
+    String.raw`r^{B\to K}\equiv\sum_{n}|\beta_{0,n}^{B\to K}|^2`,
+    String.raw`\sum_{n=0}^{\infty}\{2|\beta_{0,n}^{B\to K}|^2+\sum_{\lambda=\perp,\parallel,0}[2|\beta_{\lambda,n}^{B\to K^*}|^2+|\beta_{\lambda,n}^{B_s\to\phi}|^2]\}<1`,
+  ];
+  function buildFormulas() {
+    const box = $("#s-part4 .formulas");
+    if (!box) return;
+    const rand = rng(4), TINT =["var(--aqua)", "var(--cyan)", "var(--magenta)"], colourOf = (i) => (i % 4 === 3 ? TINT[Math.floor(i / 4) % 3] : "var(--boson)");
+    PAPER_EQS.forEach((eq, i) => {
+      const s = document.createElement("span");
+      s.className = "ff";
+      s.textContent = `\\(${eq}\\)`;
+      const dur = 12 + rand() * 6;
+      s.style.cssText = `color:${colourOf(i)};--dur:${dur.toFixed(1)}s;--delay:${(-rand() * dur).toFixed(1)}s;--o:${(0.36 + rand() * 0.16).toFixed(2)}`;
+      box.appendChild(s);
+    });
+  }
+  // placed once the slide is on screen (hidden slides have no size): biggest first, never overlapping each other or the title
+  let formulasPlaced = false;
+  function placeFormulas() {
+    const box = $("#s-part4 .formulas");
+    if (formulasPlaced || !box) return;
+    const items = [...box.children];
+    if (!items.length || !items[0].offsetWidth) return;
+    formulasPlaced = true;
+    const rand = rng(21), W = 1280, H = 720, M = 26;
+    const title = [215, 222, 1065, 452];            // the PART 4 label and the big title
+    const placed = [title];
+    const hit = (r, o) => r[0] < o[2] + M && r[2] > o[0] - M && r[1] < o[3] + M && r[3] > o[1] - M;
+    items.map((s) => ({ s, w: s.offsetWidth, h: s.offsetHeight })).sort((p, q) => q.w * q.h - p.w * p.h).forEach(({ s, w, h }) => {
+      let best = null;
+      for (let k = 0; k < 600 && !best; k++) {
+        const x = 24 + rand() * (W - w - 48), y = 24 + rand() * (H - h - 48), r = [x, y, x + w, y + h];
+        if (!placed.some((o) => hit(r, o))) best = r;
+      }
+      best = best || [24, 24, 24 + w, 24 + h];
+      placed.push(best);
+      s.style.left = best[0].toFixed(0) + "px";
+      s.style.top = best[1].toFixed(0) + "px";
+    });
+  }
+
+  /* ================= Part 5: predictions ================= */
+  const Kmeson = (parent, attrs, tail = "") => mixed(parent, attrs, [["K", 1], [" meson" + tail, 0]]);
+  const errBar = (g, x, y, ey, hw, colour, delay) => {
+    const p = el("g", { class: "fadein", style: `--d:${delay}s` }, g);
+    el("path", { d: `M${f(x - hw)} ${f(y)} H${f(x + hw)} M${f(x)} ${f(y - ey)} V${f(y + ey)}`, fill: "none", stroke: colour, "stroke-width": 2, "stroke-linecap": "round" }, p);
+    el("circle", { cx: f(x), cy: f(y), r: 4.5, fill: colour }, p);
+  };
+
+  /* ---- putting the pieces together: sum rules at high K speed, lattice at low, one band through both ---- */
+  function buildMatching() {
+    const g = $("#match");
+    if (!g) return;
+    const P = { x0: 96, x1: 560, top: 60, bot: 420 };
+    const X = (u) => P.x0 + 14 + u * (P.x1 - P.x0 - 30), Y = (v) => P.bot - v * (P.bot - P.top);
+    const fn = (u) => 0.3 + 0.62 * Math.pow(u, 1.7), w = (u) => 0.075 - 0.045 * u;
+    el("path", { d: `M${P.x0} ${P.bot} V${P.top - 8}`, class: "axis-line", "marker-end": "url(#arrow-head)" }, g);
+    el("path", { d: `M${P.x0} ${P.bot} H${P.x1 + 10}`, class: "axis-line", "marker-end": "url(#arrow-head)" }, g);
+    txt(g, "fast", { x: f(X(0)), y: P.bot + 32, class: "fig-tag c-dim" });
+    txt(g, "slow", { x: f(X(1)), y: P.bot + 32, "text-anchor": "end", class: "fig-tag c-dim" });
+    mixed(g, { x: f((P.x0 + P.x1) / 2), y: P.bot + 68, "text-anchor": "middle", class: "fig-tag" }, [["speed of the ", 0], ["K", 1], [" meson", 0]]);
+    txt(g, "matrix element", { x: 40, y: f((P.top + P.bot) / 2), "text-anchor": "middle", class: "fig-tag", transform: `rotate(-90 40 ${f((P.top + P.bot) / 2)})` });
+    // the combined band is drawn first (it comes with the click), the points on top
+    const band = el("g", { class: "on-1" }, g);
+    let up = "", lo = "";
+    for (let u = 0; u <= 1.0001; u += 0.02) { up += (up ? "L" : "M") + f(X(u)) + " " + f(Y(fn(u) + w(u))); }
+    for (let u = 1; u >= -0.0001; u -= 0.02) { lo += "L" + f(X(u)) + " " + f(Y(fn(u) - w(u))); }
+    el("path", { d: up + lo + "Z", class: "comb-band" }, band);
+    el("path", { d: curve_(fn, X, Y), class: "fit-sm dl", pathLength: 1 }, band);
+    txt(band, "combined", { x: f(X(0.5)), y: f(Y(fn(0.5) + 0.2)), "text-anchor": "middle", class: "fig-tag c-sm" });
+    [0.04, 0.16, 0.28, 0.40].forEach((u, i) => errBar(g, X(u), Y(fn(u)), 0.075 * (P.bot - P.top), 0, "var(--aqua)", 0.4 + 0.18 * i));
+    [0.62, 0.72, 0.82, 0.92].forEach((u, i) => errBar(g, X(u), Y(fn(u)), 0.028 * (P.bot - P.top), 0, "var(--cyan)", 1.2 + 0.18 * i));
+    txt(g, "sum rules", { x: f(X(0.2)), y: f(Y(0.6)), "text-anchor": "middle", class: "fig-tag", style: "fill:var(--aqua);font-weight:600" });
+    txt(g, "lattice", { x: f(X(0.78)), y: f(Y(0.5)), "text-anchor": "middle", class: "fig-tag", style: "fill:var(--cyan);font-weight:600" });
+  }
+  function curve_(fn, X, Y) {
+    let d = "";
+    for (let u = 0; u <= 1.0001; u += 0.01) d += (d ? "L" : "M") + f(X(u)) + " " + f(Y(fn(u)));
+    return d;
+  }
+
+  /* ---- the charm-quark trap ---- */
+  function buildCharm() {
+    const g = $("#charm");
+    if (!g) return;
+    const diag = (cx, top, tx) => {
+      const d = el("g", { transform: `translate(${tx} 6) scale(1.15)` }, g);
+      const arrowAt = (x, y, cls) => el("path", { d: `M${x} ${y} l-12 -6 v12 z`, class: "arrow " + cls }, d);
+      el("path", { d: `M${cx - 100} 176 H${cx - 36}`, class: "quark q-b" }, d);
+      el("path", { d: `M${cx + 36} 176 H${cx + 100}`, class: "quark q-s" }, d);
+      arrowAt(cx - 70, 176, "a-b"); arrowAt(cx + 78, 176, "a-s");
+      txt(d, "b", { x: cx - 70, y: 156, "text-anchor": "middle", class: "q-label t-b" });
+      txt(d, "s", { x: cx + 78, y: 156, "text-anchor": "middle", class: "q-label t-s" });
+      let photonFrom, mu;
+      if (top) {
+        el("path", { d: `M${cx - 36} 176 H${cx + 36}`, class: "quark" }, d);
+        txt(d, "t", { x: cx, y: 202, "text-anchor": "middle", class: "q-label" });
+        const arch = (t) => [cx - 36 * Math.cos(Math.PI * t), 176 - 72 * Math.sin(Math.PI * t)];
+        el("path", { d: wavy(arch, 6, 4, 200), class: "boson" }, d);
+        el("circle", { cx: cx - 36, cy: 176, r: 4.5, class: "vertex" }, d); el("circle", { cx: cx + 36, cy: 176, r: 4.5, class: "vertex" }, d);
+        photonFrom = [cx, 104]; mu = 58;
+        txt(d, "W", { x: cx, y: 146, "text-anchor": "middle", class: "b-label" });
+      } else {
+        // the Standard Model diagram: b -> c W, the charm quark runs round the loop and radiates the photon, then c W -> s
+        el("path", { d: `M${cx - 36} 176 A36 66 0 0 1 ${cx + 36} 176`, class: "quark charm-loop", fill: "none" }, d);
+        el("path", { d: "M0 0 l-12 -6 v12 z", class: "arrow", style: "fill:var(--lime)", transform: `translate(${cx - 23} 126) rotate(-57)` }, d);
+        el("path", { d: wavy(line(cx - 36, 176, cx + 36, 176), 4, 4, 80), class: "boson" }, d);
+        txt(d, "c", { x: cx, y: 148, "text-anchor": "middle", class: "q-label", style: "fill:var(--lime)" });
+        txt(d, "W", { x: cx, y: 206, "text-anchor": "middle", class: "b-label" });
+        photonFrom = [cx, 110]; mu = 36;
+      }
+      el("path", { d: wavy(line(photonFrom[0], photonFrom[1], cx, mu), 3, 4, 50), class: "boson" }, d);
+      if (!top) [[cx - 36, 176], [cx + 36, 176], [cx, 110]].forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 4.5, class: "vertex", style: "fill:var(--lime)" }, d));   // on top of the lines
+      [[-1, "+"], [1, "−"]].forEach(([s, sign]) => {
+        el("path", { d: `M${cx} ${mu} L${cx + s * 32} ${mu - 36}`, class: "lepton" }, d);
+        muLabel(d, cx + s * 40, mu - 30, s < 0 ? "end" : "start", sign, { class: "mu-label" });
+      });
+      el("circle", { cx, cy: mu, r: 4.5, class: "vertex" }, d);
+      txt(d, top ? "rare decay" : "charm loop", { x: cx, y: 246, "text-anchor": "middle", class: "fig-tag", style: top ? "fill:var(--magenta);font-weight:600" : "fill:var(--lime);font-weight:600" });
+    };
+    diag(150, true, -27); diag(150, false, 283);
+  }
+
+  /* ---- theory meets experiment: the SM band lies above all the measurements ----
+     Data read off the EOS preliminary plot (pixel analysis of the picture): bins [1,8] GeV^2, rate in units of 1e-5 GeV^-2 */
+  function buildTension(id = "tension") {
+    const g = document.getElementById(id);
+    if (!g) return;
+    const P = { x0: 104, x1: 556, top: 100, bot: 420 }, QMIN = 0.9, QMAX = 8.3, VMIN = 1, VMAX = 5.6;
+    const X = (q) => P.x0 + ((q - QMIN) / (QMAX - QMIN)) * (P.x1 - P.x0), Y = (v) => P.bot - ((v - VMIN) / (VMAX - VMIN)) * (P.bot - P.top);
+    el("path", { d: `M${P.x0} ${P.bot} V${P.top - 14}`, class: "axis-line", "marker-end": "url(#arrow-head)" }, g);
+    el("path", { d: `M${P.x0} ${P.bot} H${P.x1 + 14}`, class: "axis-line", "marker-end": "url(#arrow-head)" }, g);
+    for (let q = 1; q <= 8; q++) {
+      el("path", { d: `M${f(X(q))} ${P.bot} v8`, class: "axis-line" }, g);
+      txt(g, String(q), { x: f(X(q)), y: P.bot + 34, "text-anchor": "middle", class: "axis-tick" });
+    }
+    const xt = txt(g, "mass", { x: f((P.x0 + P.x1) / 2), y: P.bot + 72, "text-anchor": "middle", class: "fig-tag" });
+    xt.textContent = "(mass of the muon pair)²  [GeV²]";
+    const mid = (P.top + P.bot) / 2;
+    const ylab = (x, build) => { const t = el("text", { x, y: f(mid), "text-anchor": "middle", class: "fig-tag", transform: `rotate(-90 ${x} ${f(mid)})` }, g); build(t); };
+    const add = (t, s, attrs) => { const n = el("tspan", attrs || {}, t); n.textContent = s; };
+    // the kaon is fast at small q² and slow at large q² (seen from the B meson)
+    txt(g, "fast kaon", { x: P.x0, y: P.bot + 112, class: "fig-tag c-dim" });
+    txt(g, "slow kaon", { x: P.x1, y: P.bot + 112, "text-anchor": "end", class: "fig-tag c-dim" });
+    el("path", { d: `M${P.x0 + 104} ${P.bot + 106} H${P.x1 - 118}`, class: "axis-line", "marker-end": "url(#arrow-head)" }, g);
+    ylab(30, (t) => { add(t, "how often "); add(t, "B", { style: "font-style:italic" }); add(t, " → "); add(t, "K", { style: "font-style:italic" }); add(t, " "); add(t, "μ", { style: "font-style:italic" }); add(t, "+", { "baseline-shift": "super", "font-size": "70%" }); add(t, "μ", { style: "font-style:italic" }); add(t, "−", { "baseline-shift": "super", "font-size": "70%" }); add(t, " happens"); });
+    ylab(60, (t) => { add(t, "(per GeV"); add(t, "2", { "baseline-shift": "super", "font-size": "70%" }); add(t, ")"); });
+
+    // the SM prediction, one box per bin
+    const edges = [1, 2, 3, 4, 5, 6, 7, 8], cv = [3.832, 3.810, 3.793, 3.776, 3.745, 3.724, 3.719], hw = [0.216, 0.212, 0.212, 0.220, 0.259, 0.350, 0.570];
+    cv.forEach((c, i) => el("rect", { x: f(X(edges[i])), y: f(Y(c + hw[i])), width: f(X(edges[i + 1]) - X(edges[i])), height: f(Y(c - hw[i]) - Y(c + hw[i])), class: "sm-box" }, g));
+
+    // the measurements: [bin low, bin high, value, error, horizontal offset of the error bar inside the bin]
+    const EXP = [
+      ["BaBar", "#c9d1e0", [[2, 4.3, 2.12, 0.65, 0], [4.3, 8.12, 2.45, 0.54, 0]]],
+      ["Belle", "#7d8799", [[1, 6, 4.57, 0.80, 0]]],
+      ["LHCb", "var(--aqua)", [[1, 2, 2.34, 0.15, -0.14], [2, 3, 2.83, 0.15, -0.14], [3, 4, 2.55, 0.15, -0.14], [4, 5, 2.22, 0.15, -0.14], [5, 6, 2.32, 0.15, -0.14], [6, 7, 2.47, 0.15, -0.14], [7, 8, 2.31, 0.15, -0.14]]],
+      ["CMS", "var(--cyan)", [[1, 2, 2.135, 0.24, 0.14], [2, 3, 3.05, 0.24, 0.14], [3, 4, 2.53, 0.24, 0.14], [4, 5, 2.46, 0.24, 0.14], [5, 6, 2.52, 0.24, 0.14], [6, 7, 2.49, 0.24, 0.14], [7, 8, 2.33, 0.24, 0.14]]],
+    ];
+    const ms = el("g", { class: "on-1" }, g);
+    EXP.forEach(([name, col, pts], k) => {
+      const grp = el("g", { class: "fadein", style: `--d:${(0.15 + 0.35 * k).toFixed(2)}s` }, ms);
+      pts.forEach(([a0, a1, v, e, off]) => {
+        const y = Y(v), xc = X((a0 + a1) / 2 + off), ey = Y(v - e) - Y(v);
+        el("path", { d: `M${f(X(a0))} ${f(y)} H${f(X(a1))}`, stroke: col, "stroke-width": 2.2, "stroke-opacity": 0.85, fill: "none", "stroke-linecap": "round" }, grp);
+        el("path", { d: `M${f(xc)} ${f(y - ey)} V${f(y + ey)}`, stroke: col, "stroke-width": 2.2, fill: "none", "stroke-linecap": "round" }, grp);
+        el("circle", { cx: f(xc), cy: f(y), r: 3.8, fill: col }, grp);
+      });
+    });
+
+    // legend above the plot: the SM first, the experiments with the click
+    const sw = el("g", {}, g);
+    el("rect", { x: P.x0, y: 22, width: 28, height: 15, rx: 2, class: "sm-box" }, sw);
+    txt(sw, "SM prediction", { x: P.x0 + 38, y: 36, class: "fig-tag c-sm" });
+    const lg = el("g", { class: "on-1" }, g);
+    const entry = (x, y, col, label) => {
+      el("path", { d: `M${x - 12} ${y - 6} H${x + 12}`, stroke: col, "stroke-width": 2.2, "stroke-linecap": "round" }, lg);
+      el("path", { d: `M${x} ${y - 13} V${y + 1}`, stroke: col, "stroke-width": 2.2, "stroke-linecap": "round" }, lg);
+      el("circle", { cx: x, cy: y - 6, r: 3.8, fill: col }, lg);
+      txt(lg, label, { x: x + 22, y, class: "fig-tag", style: `fill:${col}` });
+    };
+    entry(P.x0 + 250, 36, "var(--aqua)", "LHCb");
+    entry(P.x0 + 352, 36, "var(--cyan)", "CMS");
+    entry(P.x0 + 250, 70, "#c9d1e0", "BaBar");
+    entry(P.x0 + 352, 70, "#7d8799", "Belle");
+  }
+
+  /* ---- new physics or strong interactions? a balance that cannot decide ---- */
+  function buildFork() {
+    const g = $("#fork");
+    if (!g) return;
+    el("path", { d: "M300 150 V452", class: "axis-line", style: "stroke-width:4" }, g);
+    el("path", { d: "M236 468 H364 L350 452 H250 Z", class: "fork-base" }, g);
+    const beam = el("g", { class: "fork-beam" }, g);
+    el("path", { d: "M92 150 H508", class: "fork-bar" }, beam);
+    const pan = (cls, x, orbFill, label, parts, late, line2) => {
+      const pg = el("g", { class: cls }, g);
+      const gr = el("g", { class: late ? "on-1" : "" }, pg);
+      el("path", { d: `M${x} 150 L${x - 62} 296 M${x} 150 L${x + 62} 296`, class: "fork-string" }, pg);
+      el("path", { d: `M${x - 74} 296 H${x + 74} Q${x + 74} 336 ${x} 336 Q${x - 74} 336 ${x - 74} 296 Z`, class: "fork-pan" }, pg);
+      el("circle", { cx: x, cy: 262, r: 30, fill: orbFill, "fill-opacity": 0.28, stroke: orbFill, "stroke-width": 2.4 }, gr);
+      mixed(gr, { x, y: 272, "text-anchor": "middle", class: "fig-tag", style: `fill:${orbFill};font-size:30px;font-weight:600` }, [label]);
+      mixed(pg, { x, y: 376, "text-anchor": "middle", class: "fig-tag", style: `fill:${orbFill};font-weight:600` }, parts);
+      if (line2) mixed(pg, { x, y: 404, "text-anchor": "middle", class: "fig-tag", style: `fill:${orbFill};font-weight:600` }, line2);
+    };
+    pan("fork-pan-l", 92, "var(--lime)", ["Z′", 1], [["new particle ", 0], ["Z′", 1]], false);
+    pan("fork-pan-r", 508, "var(--cyan)", ["g", 1], [["strong", 0]], true, [["interactions", 0]]);
+    txt(g, "?", { x: 300, y: 112, "text-anchor": "middle", style: "fill:var(--fg);font-family:var(--font);font-size:56px;font-weight:300" });
+    el("circle", { cx: 300, cy: 150, r: 9, class: "vertex" }, g);
+  }
+
+  /* ---- the future: a timeline of data (indicative dates) and the theory that has to keep up ---- */
+  function buildFuture() {
+    const g = $("#future");
+    if (!g) return;
+    const X0 = 150, X1 = 570, Y0 = 2026, Y1 = 2046, AX = 440;
+    const X = (y) => X0 + ((y - Y0) / (Y1 - Y0)) * (X1 - X0);
+    el("path", { d: `M${X0} ${AX} H${X1 + 14}`, class: "axis-line", "marker-end": "url(#arrow-head)" }, g);
+    [2026, 2030, 2035, 2040, 2045].forEach((y) => {
+      el("path", { d: `M${f(X(y))} ${AX} v8`, class: "axis-line" }, g);
+      txt(g, String(y), { x: f(X(y)), y: AX + 34, "text-anchor": "middle", class: "axis-tick" });
+    });
+    // today
+    el("path", { d: `M${f(X(2026.85))} 70 V${AX}`, class: "axis-line", style: "stroke-dasharray:4 5" }, g);
+    txt(g, "today", { x: f(X(2026.85) + 8), y: 76, class: "fig-tag c-dim" });
+    // [label, colour, y, [[from, to, solid?], ...]]
+    const ROWS = [
+      ["LHC, LHCb", "var(--aqua)", 150, [[2026.85, 2030, false], [2030, 2041, true, "HL-LHC"]], 0],
+      ["Belle II", "var(--cyan)", 250, [[2026.85, 2042, true, "~50× Belle"]], 0],
+      ["FCC-ee", "var(--lime)", 350, [[2030, 2045, false, "planning, construction"], [2045, 2046, true]], 1],
+    ];
+    ROWS.forEach(([label, col, y, segs, late], k) => {
+      const grp = el("g", { class: late ? "on-1" : "" }, g);
+      const inner = el("g", { class: "fadein", style: `--d:${(0.2 + 0.25 * k).toFixed(2)}s` }, grp);
+      txt(inner, label, { x: 0, y: y + 7, class: "fig-tag", style: `fill:${col};font-weight:600` });
+      segs.forEach(([a, b, solid, text]) => {
+        el("rect", { x: f(X(a)), y: y - 18, width: f(X(b) - X(a)), height: 36, rx: 6, fill: solid ? col : "none", "fill-opacity": 0.26, stroke: col,
+                     "stroke-width": solid ? 2.2 : 1.8, "stroke-opacity": solid ? 1 : 0.7, "stroke-dasharray": solid ? "none" : "6 5" }, inner);
+        if (text) txt(inner, text, { x: f((X(a) + X(b)) / 2), y: y + 7, "text-anchor": "middle", class: "fig-tag", style: `fill:${col}` });
+      });
+      if (label === "FCC-ee") el("path", { d: `M${f(X(2046))} ${y} h14`, stroke: col, "stroke-width": 2.2, fill: "none", "marker-end": "url(#arrow-head)" }, inner);
+    });
+    // legend: dashed = preparation, solid = taking data
+    const lg = el("g", {}, g);
+    el("rect", { x: X0, y: 500, width: 34, height: 20, rx: 4, fill: "none", stroke: "var(--muted)", "stroke-width": 1.8, "stroke-dasharray": "6 5" }, lg);
+    txt(lg, "preparation", { x: X0 + 44, y: 516, class: "fig-tag c-dim" });
+    el("rect", { x: X0 + 210, y: 500, width: 34, height: 20, rx: 4, fill: "var(--muted)", "fill-opacity": 0.26, stroke: "var(--muted)", "stroke-width": 2.2 }, lg);
+    txt(lg, "data and results", { x: X0 + 254, y: 516, class: "fig-tag c-dim" });
+  }
+
+  /* ---- divider: a wall of tables (grey, scrolling) with a few coloured plots over it ---- */
+  function buildStats() {
+    const wall = $("#s-part5 .wall"), plots = $("#s-part5 .plots");
+    if (!wall) return;
+    const rand = rng(9), gnum = () => { let s = 0; for (let i = 0; i < 6; i++) s += rand(); return (s - 3) * 1.1; };
+    const f2 = (x, n = 2) => (x < 0 ? "−" : "") + Math.abs(x).toFixed(n);
+    const unc = (x, u) => `${f2(x)}±${u.toFixed(2)}`;
+    // rows copied from the last tables of the paper, then rows of the same kind
+    const REAL_A = [
+      "α0A0   0.38±0.04  0.42±0.02    α0T1   0.34±0.04  0.30±0.01", "α1A0  −1.26±0.40  −0.98±0.24    α1T1  −0.77±0.32  −1.10±0.08",
+      "α2A0   2.83±3.83  3.27±1.36    α2T1   0.93±2.76  0.58±1.00", "α0A1   0.30±0.03  0.29±0.01    α0T23  0.64±0.06  0.65±0.04",
+    ];
+    const NAMES = ["A0", "A1", "A12", "T1", "T2", "T23", "V", "+", "0", "T"];
+    const rowA = () => { const k = () => NAMES[Math.floor(rand() * NAMES.length)], d = () => Math.floor(rand() * 3);
+      return `α${d()}${k()}   ${unc(gnum() * 0.8, rand() * 0.6)}  ${unc(gnum() * 0.8, rand() * 0.4)}    α${d()}${k()}   ${unc(gnum() * 0.8, rand() * 0.6)}  ${unc(gnum() * 0.8, rand() * 0.4)}`; };
+    const BINS = ["[0.1,0.98]", "[1.1,2.5]", "[2.5,4.0]", "[4.0,6.0]", "[6.0,8.0]", "[1.1,4.0]", "[15,17]", "[17,19]"];
+    const rowB = (i) => `${BINS[i % BINS.length]}   ${[1, 2, 3, 4].map(() => `${f2(gnum() * 3, 2)} ±${(rand() * 0.9).toFixed(2)}`).join("   ")}`;
+    const rowC = () => `χ² ${(rand() * 40 + 2).toFixed(1)}   dof ${Math.floor(rand() * 90 + 6)}   p ${rand().toFixed(2)}   ${f2(gnum() * 2)}σ`;
+    const TABLES = [
+      ["Table 12: SM predictions, angular observables, B⁰→K*⁰μ⁺μ⁻", "q² bin    F_L[10⁻¹]   S₃[10⁻²]   S₄[10⁻¹]   S₅[10⁻¹]", (i) => rowB(i), 11],
+      ["Table 11: Posteriors of the Bs→φ local form factors", "Coefficient   This work   Ref.[29]      Coefficient   This work   Ref.[29]", (i) => (i < REAL_A.length ? REAL_A[i] : rowA()), 10],
+      ["Table 5: χ², dof, p-values of the fits", "Fit                  χ²     dof    p      pull", () => rowC(), 9],
+      ["Table 10: Posteriors of the B→K* local form factors", "Coefficient   This work   Ref.[29]      Coefficient   This work   Ref.[29]", () => rowA(), 11],
+      ["Table 9: Posteriors of the B→K local form factors", "Coefficient   This work   Ref.[30]      Coefficient   This work   Ref.[30]", () => rowA(), 8],
+      ["Table 13: SM predictions, Bs→φμ⁺μ⁻", "q² bin    F_L[10⁻¹]   S₃[10⁻²]   S₄[10⁻¹]   S₅[10⁻¹]", (i) => rowB(i + 3), 12],
+    ];
+    const rows = [];
+    // a handful of table windows at random places (no two overlapping), each scrolling at its own speed
+    const lay = rng(23), spots = [];
+    for (let tries = 0; tries < 600 && spots.length < 9; tries++) {
+      const w = 330 + lay() * 80, h = 130 + lay() * 110, x = 16 + lay() * (1280 - w - 32), y = 10 + lay() * (720 - h - 20);
+      if (spots.every((s) => x > s.x + s.w + 4 || x + w + 4 < s.x || y > s.y + s.h + 4 || y + h + 4 < s.y)) spots.push({ x, y, w, h });
+    }
+    for (let c = 0; c < spots.length; c++) {
+      const col = document.createElement("div");
+      col.className = "wcol";
+      const sp = spots[c];
+      col.style.cssText = `left:${sp.x.toFixed(0)}px;top:${sp.y.toFixed(0)}px;width:${sp.w.toFixed(0)}px;height:${sp.h.toFixed(0)}px;--dur:${(70 + lay() * 40).toFixed(0)}s;--start:${(-lay() * 60).toFixed(0)}s`;
+      const inner = document.createElement("div");
+      inner.className = "wscroll";
+      for (let rep = 0; rep < 2; rep++) {                         // twice, so the loop is seamless
+        for (let t = 0; t < TABLES.length; t++) {
+          const [cap, head, gen, n] = TABLES[(t + c * 2) % TABLES.length];
+          const cp = document.createElement("div"); cp.className = "wcap"; cp.textContent = cap; inner.appendChild(cp);
+          const hd = document.createElement("div"); hd.className = "whead"; hd.textContent = head; inner.appendChild(hd);
+          for (let i = 0; i < n; i++) { const r = document.createElement("div"); r.className = "wrow"; r.textContent = gen(i); inner.appendChild(r); rows.push(r); }
+          const sp = document.createElement("div"); sp.className = "wgap"; inner.appendChild(sp);
+        }
+      }
+      col.appendChild(inner);
+      wall.appendChild(col);
+    }
+    // a few rows light up at a time
+    if (!reduce) setInterval(() => {
+      if (!isPresent("s-part5")) return;
+      for (let k = 0; k < 6; k++) {
+        const r = rows[Math.floor(Math.random() * rows.length)];
+        r.classList.add("hot");
+        setTimeout(() => r.classList.remove("hot"), 700 + Math.random() * 700);
+      }
+    }, 180);
+
+    // coloured plots that fade in and out over the wall
+    const card = (cls, w, h, delay) => {
+      const d = document.createElement("div");
+      d.className = "pcard " + cls;
+      d.style.setProperty("--pd", delay + "s");
+      const s = document.createElementNS(NS, "svg");
+      s.setAttribute("viewBox", `0 0 ${w} ${h}`); s.setAttribute("width", w); s.setAttribute("height", h);
+      d.appendChild(s); plots.appendChild(d);
+      return s;
+    };
+    const axes = (s, w, h) => {
+      el("path", { d: `M28 ${h - 22} V12`, stroke: "var(--muted)", "stroke-width": 1.6, fill: "none", "marker-end": "url(#arrow-head)" }, s);
+      el("path", { d: `M28 ${h - 22} H${w - 10}`, stroke: "var(--muted)", "stroke-width": 1.6, fill: "none", "marker-end": "url(#arrow-head)" }, s);
+    };
+    // A: the SM band above the measurements
+    const A = card("pa", 330, 210, 0);
+    axes(A, 330, 210);
+    const cA = [58, 57, 57, 56, 56, 55, 55, 54], hA = [5, 5, 5, 6, 7, 8, 10, 13];
+    cA.forEach((c, i) => el("rect", { x: 36 + i * 35, y: c - hA[i], width: 35, height: 2 * hA[i], fill: "var(--magenta)", "fill-opacity": 0.34, stroke: "var(--magenta)", "stroke-width": 1.4 }, A));
+    [[74, 12], [102, 10], [74 + 70, 11], [74 + 105, 9], [74 + 140, 10], [74 + 175, 9], [74 + 210, 11], [74 + 245, 10]].forEach(([x, e], i) => {
+      const y = [92, 108, 94, 102, 110, 106, 104, 108][i];
+      el("path", { d: `M${x - 15} ${y} H${x + 15} M${x} ${y - e} V${y + e}`, stroke: "var(--fg)", "stroke-width": 1.8, fill: "none" }, A);
+      el("circle", { cx: x, cy: y, r: 3.4, fill: "var(--fg)" }, A);
+    });
+    // B: pulls of many observables
+    const B = card("pb", 330, 210, 5);
+    axes(B, 330, 210);
+    el("path", { d: "M28 100 H320", stroke: "var(--line)", "stroke-width": 1.4, "stroke-dasharray": "5 5" }, B);
+    const pr = rng(5);
+    for (let i = 0; i < 20; i++) {
+      let v = 0; for (let k = 0; k < 6; k++) v += pr(); v = (v - 3) * 2.1; if (i === 3 || i === 11) v = -2.6;
+      const col = Math.abs(v) < 1 ? "var(--aqua)" : Math.abs(v) < 2 ? "var(--cyan)" : "var(--magenta)", hh = v * 26;
+      el("rect", { x: 38 + i * 14.2, y: hh >= 0 ? 100 - hh : 100, width: 9, height: Math.abs(hh), rx: 1.5, fill: col }, B);
+    }
+    // C: allowed region of two parameters, away from the SM point
+    const C = card("pc", 330, 210, 10);
+    axes(C, 330, 210);
+    [[86, 34, 0.12], [58, 23, 0.2], [30, 12, 0.34]].forEach(([rx, ry, a]) =>
+      el("ellipse", { cx: 150, cy: 92, rx, ry, transform: "rotate(-24 150 92)", fill: "var(--aqua)", "fill-opacity": a, stroke: "var(--aqua)", "stroke-width": 1.5 }, C));
+    el("path", { d: "M250 140 l-9 -9 m18 0 l-18 18 M250 140 l9 9", stroke: "var(--magenta)", "stroke-width": 3, fill: "none", "stroke-linecap": "round" }, C);
+    el("path", { d: "M241 131 L259 149 M259 131 L241 149", stroke: "var(--magenta)", "stroke-width": 3, "stroke-linecap": "round" }, C);
+  }
+
   buildCollisions();
   buildBasic();
   buildRutherford();
@@ -1299,6 +1773,17 @@
   buildInvisible();
   buildHistory();
   buildNP();
+  buildMeasure();
+  buildSeries();
+  buildSumRules();
+  buildFormulas();
+  buildMatching();
+  buildCharm();
+  buildTension();
+  buildTension("tension-take");   // the same plot again on the take-home slide
+  buildFork();
+  buildStats();
+  buildFuture();
   buildEvent();
   buildHadrons();
   buildZoom();
@@ -1323,17 +1808,51 @@
     });
   }
 
-  // divider: grey, fuzzy bubbles rising like in a liquid
+  // divider: fuzzy glowing circles (all the same size, like the Sun) rising like in a liquid: mostly grey, a few in the three colours
   const bc = $("#s-part1 .bubbles");
   if (bc) {
-    for (let i = 0; i < 130; i++) {
-      const b = document.createElement("span"), size = 2.5 + Math.pow(Math.random(), 2) * 12, dur = 22 - size / 2 + Math.random() * 6;
+    const G = "154,165,186";
+    const GLOW = [G, G, G, G, G, G, G, G, "0,255,160", G, G, G, G, G, G, G, G, "255,67,200", G, G, G, G, G, G, G, G, "0,230,255"];   // about 1 in 9 coloured, the three colours equally
+    for (let i = 0; i < 72; i++) {
+      const b = document.createElement("span"), dur = 20 + Math.random() * 10, rgb = GLOW[i % GLOW.length];
       b.className = "bubble";
-      b.style.cssText = `left:${(Math.random() * 100).toFixed(1)}%;width:${size.toFixed(0)}px;height:${size.toFixed(0)}px;` +
-        `--dur:${dur.toFixed(1)}s;--delay:${(-Math.random() * dur).toFixed(1)}s;--o:${(0.36 + Math.random() * 0.4).toFixed(2)};` +
-        `--sway:${((Math.random() - 0.5) * 80).toFixed(0)}px;--b:${(0.4 + size / 24).toFixed(1)}px;--ty:${(-Math.random() * 760).toFixed(0)}px`;
+      b.style.cssText = `left:${(Math.random() * 93).toFixed(1)}%;--c:${rgb};` +
+        `--dur:${dur.toFixed(1)}s;--delay:${(-Math.random() * dur).toFixed(1)}s;--o:${(rgb === "154,165,186" ? 0.45 + Math.random() * 0.3 : 0.6 + Math.random() * 0.3).toFixed(2)};` +
+        `--sway:${((Math.random() - 0.5) * 80).toFixed(0)}px;--ty:${(-Math.random() * 760).toFixed(0)}px`;
       bc.appendChild(b);
     }
+  }
+
+  // Conclusion divider: tracks come in from all sides and meet around the title (the pieces come together)
+  const cv = $("#converge");
+  if (cv) {
+    const rand = rng(61), CX = 640, CY = 360, COLS = ["var(--aqua)", "var(--magenta)", "var(--cyan)"];
+    for (let i = 0; i < 54; i++) {
+      const a = rand() * 2 * Math.PI, bend = (rand() - 0.5) * 1.1, R0 = 330 + rand() * 60, R1 = 190 + rand() * 70;
+      const p = (R, ang) => [CX + R * 1.5 * Math.cos(ang), CY + R * 0.85 * Math.sin(ang)];   // the picture is wider than tall: tracks stay inside it
+      const s = p(R0, a), e = p(R1, a + bend), c = p((R0 + R1) / 2, a + bend * 0.2);
+      const colour = i % 5 === 2 ? COLS[(i / 5 | 0) % 3] : "#5d6b82";
+      const dur = 7 + rand() * 4;
+      el("path", { d: `M${f(s[0])} ${f(s[1])} Q${f(c[0])} ${f(c[1])} ${f(e[0])} ${f(e[1])}`, class: "cv-line", pathLength: 1, stroke: colour,
+                   "stroke-width": colour === "#5d6b82" ? 1.4 : 2.4,
+                   style: `--dur:${dur.toFixed(1)}s;--delay:${(rand() * 5).toFixed(1)}s;--o:${colour === "#5d6b82" ? (0.35 + rand() * 0.25).toFixed(2) : (0.55 + rand() * 0.3).toFixed(2)}` }, cv);
+    }
+  }
+
+  // closing slide: now and then one letter lights up in a colour
+  const thanks = $("#thanks");
+  if (thanks) {
+    const word = thanks.textContent;
+    thanks.textContent = "";
+    const letters = [...word].map((ch) => { const sp = document.createElement("span"); sp.className = "tl"; sp.textContent = ch; thanks.appendChild(sp); return sp; }).filter((sp) => sp.textContent.trim());
+    const COLS = ["var(--aqua)", "var(--magenta)", "var(--cyan)", "var(--lime)"];
+    if (!reduce) setInterval(() => {
+      if (!isPresent("s-end")) return;
+      const idle = letters.filter((l) => !l.style.color);
+      const sp = idle[Math.floor(Math.random() * idle.length)];
+      sp.style.color = COLS[Math.floor(Math.random() * COLS.length)];
+      setTimeout(() => { sp.style.color = ""; }, 2800);   // lit a bit longer than the gap between two letters, so two colours overlap for a moment
+    }, 2000);
   }
 
   // no single word alone on the last line: the last two words of each paragraph are joined by a non-breaking space
@@ -1346,6 +1865,15 @@
     if (i < 0) return;
     const end = nodes[i].data.replace(/\s+$/, "").length;
     let j = nodes[i].data.lastIndexOf(" ", end - 1);
+    const before = nodes[i].previousSibling;
+    if (j === 0 && before && before.nodeType === 1) {   // " word" right after an equation symbol: keep both on one line
+      const keep = document.createElement("span");
+      keep.className = "nobr";
+      before.parentNode.insertBefore(keep, before);
+      keep.appendChild(before);
+      keep.appendChild(nodes[i]);
+      return;
+    }
     if (j >= 0) { nodes[i].data = nodes[i].data.slice(0, j) + "\u00A0" + nodes[i].data.slice(j + 1); return; }
     for (let k = i - 1; k >= 0; k--) {          // the last word stands alone in its text node: bind it to the word before
       const s = nodes[k].data.replace(/\s+$/, ""), m = s.lastIndexOf(" ");
@@ -1371,9 +1899,14 @@
   };
   Reveal.on("ready", showNumber);
   Reveal.on("slidechanged", showNumber);
+  // the event display lives outside the slides and stays on from the title to the outline
+  const showEvent = () => document.querySelector(".reveal").classList.toggle("show-event", ["s-title", "s-outline"].includes(Reveal.getCurrentSlide()?.id));
+  Reveal.on("ready", showEvent);
+  Reveal.on("slidechanged", showEvent);
   const restage = () => applyStage(Reveal.getCurrentSlide());
   const ONCE = { "s-basic": "#basic", "s-purpose": "#rutherford", "s-lhc1": "#lhc", "s-lhcb": "#lhcb", "s-belle": "#belle" };
   const restartOnce = (id) => {
+    if (id === "s-part4") placeFormulas();
     if (id === "s-belle") document.dispatchEvent(new Event("belle-again"));   // rebuild first, then restart the clock
     if (ONCE[id]) { const s = $(ONCE[id]); try { s.setCurrentTime(0); s.unpauseAnimations(); } catch (err) {} }
     if (id === "s-pileup") document.dispatchEvent(new Event("pileup-again"));
