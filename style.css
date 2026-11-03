@@ -30,7 +30,22 @@
   --blue: #0096ff;
   --lime: #c1ff45;
   --font: "Jost", "JostGreek", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  /* r,g,b of the colours that are used with a transparency, and the neutrals that were fixed values */
+  --bg-rgb: 13, 16, 22; --fg-rgb: 238, 241, 246; --grey-rgb: 154, 165, 186;
+  --aqua-rgb: 0, 255, 160; --cyan-rgb: 0, 230, 255; --magenta-rgb: 255, 67, 200;
+  --track: #5d6b82; --neutron: #aab4c6; --photon: #dfe5f0; --flash: #eef1f6;
+  --grey-a: #c9d1e0; --grey-b: #7d8799;   /* the two B factories in the plot of slide 28 */
   color-scheme: dark;
+}
+/* light theme (key T): same slides, other colours; the accents keep their roles, the greys are darker */
+:root[data-theme="light"] {
+  --bg: #ffffff; --surface: #eef1f6; --line: #aeb6c4; --fg: #151a23; --muted: #475163; --boson: #566178;
+  --aqua: #462dff; --cyan: #00c878; --magenta: #dc009d; --lime: #ff3200;
+  --bg-rgb: 255, 255, 255; --fg-rgb: 21, 26, 35; --grey-rgb: 52, 62, 82;
+  --aqua-rgb: 70, 45, 255; --cyan-rgb: 0, 200, 120; --magenta-rgb: 220, 0, 157;
+  --track: #4d586c; --neutron: #6f7a8f; --photon: #68738a; --flash: #151a23;
+  --grey-a: #2f3746; --grey-b: #707b91;
+  color-scheme: light;
 }
 html, body { background: var(--bg); }
 
@@ -80,7 +95,7 @@ sup { font-size: .65em; line-height: 0; }
 .event-fig figcaption { position: absolute; right: 36px; bottom: 50px; font-size: 17px; font-style: italic; color: var(--muted); }
 .ring { fill: none; stroke: var(--line); stroke-width: 1.2; }
 .ring.outer { stroke-dasharray: 3 7; }
-.trk { fill: none; stroke: #5d6b82; stroke-width: 1.3; stroke-opacity: 0.6; stroke-linecap: round; }
+.trk { fill: none; stroke: var(--track); stroke-width: 1.3; stroke-opacity: 0.6; stroke-linecap: round; }
 .trk-b { fill: none; stroke: var(--magenta); stroke-width: 3; stroke-linecap: round; }
 .trk-k { fill: none; stroke: var(--cyan); stroke-width: 3; stroke-linecap: round; }
 .event-fig .trk-k { stroke: var(--aqua); }
@@ -180,7 +195,7 @@ sup { font-size: .65em; line-height: 0; }
 .svg-caption.small { font-size: 16px; }
 .fig-tag { font-family: var(--font); font-size: 18px; font-weight: 500; }
 .c-p { color: var(--magenta); fill: var(--magenta); }
-.c-n { color: #aab4c6; fill: #aab4c6; }
+.c-n { color: var(--neutron); fill: var(--neutron); }
 .c-e { color: var(--cyan); fill: var(--cyan); }
 .c-l { fill: var(--aqua); }
 .c-life { fill: var(--aqua); }
@@ -354,14 +369,14 @@ sup { font-size: .65em; line-height: 0; }
 
 /* ---------- three-colour scheme: aquamarine (theme, K/s), hot magenta (b quark, B meson, protons), electric cyan (leptons, electrons) ---------- */
 .text .lead { color: var(--aqua); }
-.chip.star { border-color: var(--magenta); color: var(--magenta); box-shadow: 0 0 18px rgba(255, 67, 200, 0.35); }
+.chip.star { border-color: var(--magenta); color: var(--magenta); box-shadow: 0 0 18px rgba(var(--magenta-rgb), 0.35); }
 .chip.star b { color: var(--magenta); }
 .quark.q-b { stroke: var(--magenta); } .arrow.a-b { fill: var(--magenta); } .q-label.t-b { fill: var(--magenta); }
 .quark.q-s { stroke: var(--aqua); } .arrow.a-s { fill: var(--aqua); } .q-label.t-s { fill: var(--aqua); }
 .k-glow { stroke: var(--aqua); }
 .lepton, .lepton.aqua { stroke: var(--cyan); } .mu-glow { stroke: var(--cyan); } .mu-label, .c-l { fill: var(--cyan); }
 .trk-mu, .trk-l { stroke: var(--cyan); } .trk-k { stroke: var(--aqua); }
-.boson.photon { stroke: #dfe5f0; }
+.boson.photon { stroke: var(--photon); }
 .gen-dot.k-quark { fill: var(--aqua); stroke: var(--aqua); }
 .gen-dot.k-beauty { fill: var(--magenta); stroke: var(--magenta); }
 .gen-dot.k-lepton { fill: var(--cyan); stroke: var(--cyan); }
@@ -481,7 +496,7 @@ sup { font-size: .65em; line-height: 0; }
 .cb-in { stroke: var(--boson); stroke-opacity: .5; animation: cb-draw .55s ease-in forwards, cb-fade 1.4s ease 1.7s forwards; }
 .cb-out { stroke-opacity: .6; animation: cb-draw .9s ease-out .5s forwards, cb-fade 1.6s ease 1.9s forwards; }
 .cb-boson { stroke: var(--boson); } .cb-aqua { stroke: var(--aqua); } .cb-cyan { stroke: var(--cyan); } .cb-magenta { stroke: var(--magenta); }
-.cb-flash { fill: #eef1f6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: cb-flash 1s ease .45s forwards; }
+.cb-flash { fill: var(--flash); opacity: 0; transform-box: fill-box; transform-origin: center; animation: cb-flash 1s ease .45s forwards; }
 @keyframes cb-draw { to { stroke-dashoffset: 0; } }
 @keyframes cb-fade { to { opacity: 0; } }
 @keyframes cb-flash { 0% { opacity: 0; transform: scale(.4); } 30% { opacity: .85; } 100% { opacity: 0; transform: scale(5); } }
@@ -489,30 +504,30 @@ sup { font-size: .65em; line-height: 0; }
 .still .cb-flash { animation: none !important; opacity: 0; }
 
 .pt-m { fill: var(--magenta); } .pt-a { fill: var(--aqua); } .pt-c { fill: var(--cyan); } .pt-g { fill: var(--boson); }
-.flash { fill: #eef1f6; opacity: 0; }
-.c-dim { fill: var(--muted); } .c-photon { fill: #dfe5f0; } .c-lep { fill: var(--cyan); }
+.flash { fill: var(--flash); opacity: 0; }
+.c-dim { fill: var(--muted); } .c-photon { fill: var(--photon); } .c-lep { fill: var(--cyan); }
 .tube { fill: var(--surface); stroke: var(--line); stroke-width: 2; }
-.plate { fill: rgba(0, 255, 160, .14); stroke: var(--aqua); stroke-width: 2; }
-.magnet { fill: rgba(154, 165, 186, .16); stroke: var(--boson); stroke-width: 2; }
+.plate { fill: rgba(var(--aqua-rgb), .14); stroke: var(--aqua); stroke-width: 2; }
+.magnet { fill: rgba(var(--grey-rgb), .16); stroke: var(--boson); stroke-width: 2; }
 .plate-sym { fill: var(--fg); font-family: var(--font); font-size: 24px; font-weight: 600; }
 .atom-ring { fill: none; stroke: var(--cyan); stroke-opacity: .35; stroke-width: 1.5; }
 .alpha-track { fill: none; stroke: var(--aqua); stroke-opacity: .25; stroke-width: 2; stroke-dasharray: 6 8; }
 .alpha-track.hit { stroke-opacity: .55; }
 .ring-tube { fill: none; stroke: var(--line); stroke-width: 2; }
-.dipole { fill: rgba(0, 255, 160, .14); stroke: var(--aqua); stroke-width: 2; }
-.quad { fill: rgba(0, 230, 255, .14); stroke: var(--cyan); stroke-width: 2; }
+.dipole { fill: rgba(var(--aqua-rgb), .14); stroke: var(--aqua); stroke-width: 2; }
+.quad { fill: rgba(var(--cyan-rgb), .14); stroke: var(--cyan); stroke-width: 2; }
 .rf { fill: var(--magenta); fill-opacity: .3; stroke: var(--magenta); stroke-width: 2; }
-.expt { fill: rgba(0, 255, 160, .2); stroke: var(--aqua); stroke-width: 2; }
+.expt { fill: rgba(var(--aqua-rgb), .2); stroke: var(--aqua); stroke-width: 2; }
 .beam-line { stroke: var(--line); stroke-width: 2; stroke-dasharray: 3 7; }
 .det-ring { fill: none; stroke: var(--boson); stroke-width: 2; }
 .det-ring.thin { stroke-width: 1.2; stroke-opacity: .6; }
-.det-coil { fill: rgba(0, 230, 255, .2); stroke: var(--cyan); stroke-width: 1.5; }
+.det-coil { fill: rgba(var(--cyan-rgb), .2); stroke: var(--cyan); stroke-width: 1.5; }
 .person { fill: var(--fg); }
 .person-line { stroke: var(--fg); stroke-width: 1.8; fill: none; stroke-linecap: round; }
 .cone { fill: var(--boson); fill-opacity: .1; }
 .stn { fill: var(--surface); stroke: var(--boson); stroke-width: 1.5; }
-.stn.thick { stroke-width: 2; stroke: var(--cyan); fill: rgba(0, 230, 255, .1); }
-.det-magnet { fill: rgba(0, 255, 160, .12); stroke: var(--aqua); stroke-width: 2; }
+.stn.thick { stroke-width: 2; stroke: var(--cyan); fill: rgba(var(--cyan-rgb), .1); }
+.det-magnet { fill: rgba(var(--aqua-rgb), .12); stroke: var(--aqua); stroke-width: 2; }
 .b-flight { stroke: var(--magenta); stroke-width: 3; }
 .belle-ray { stroke-width: 3; fill: none; stroke-linecap: round; }
 .nu-ray { fill: none; stroke: var(--cyan); stroke-width: 2.5; stroke-dasharray: 7 6; }
@@ -523,7 +538,7 @@ sup { font-size: .65em; line-height: 0; }
 .fig-tag.c-dim { fill: var(--muted); }
 
 .det-spoke { stroke: var(--boson); stroke-width: 1; stroke-opacity: .45; fill: none; }
-.det-coil { fill: rgba(0, 230, 255, .22); stroke: var(--cyan); stroke-width: 1.5; }
+.det-coil { fill: rgba(var(--cyan-rgb), .22); stroke: var(--cyan); stroke-width: 1.5; }
 
 
 /* ===================== Part 3: new physics ===================== */
@@ -663,13 +678,13 @@ sup { font-size: .65em; line-height: 0; }
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent), linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
   -webkit-mask-composite: source-in; mask-composite: intersect;
   mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent), linear-gradient(to right, transparent, #000 10%, #000 90%, transparent); }
-.wscroll { font-family: var(--font); font-variant-numeric: tabular-nums; color: rgba(154, 165, 186, .5); white-space: pre; font-size: 14px; line-height: 1.5; }
+.wscroll { font-family: var(--font); font-variant-numeric: tabular-nums; color: rgba(var(--grey-rgb), .5); white-space: pre; font-size: 14px; line-height: 1.5; }
 .present .wscroll { animation: wall-up var(--dur) linear var(--start) infinite; }
 @keyframes wall-up { to { transform: translateY(-50%); } }
-.wcap { font-weight: 600; color: rgba(154, 165, 186, .72); margin-top: 6px; white-space: normal; }
-.whead { color: rgba(154, 165, 186, .62); border-bottom: 1px solid rgba(154, 165, 186, .22); padding-bottom: 3px; margin-bottom: 3px; }
+.wcap { font-weight: 600; color: rgba(var(--grey-rgb), .72); margin-top: 6px; white-space: normal; }
+.whead { color: rgba(var(--grey-rgb), .62); border-bottom: 1px solid rgba(var(--grey-rgb), .22); padding-bottom: 3px; margin-bottom: 3px; }
 .wrow { transition: color .6s ease; }
-.wrow.hot { color: rgba(238, 241, 246, .95); transition: color .15s ease; }
+.wrow.hot { color: rgba(var(--fg-rgb), .95); transition: color .15s ease; }
 .wgap { height: 22px; }
 .still .wscroll { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .present .wscroll { animation: none; } }
@@ -682,7 +697,7 @@ sup { font-size: .65em; line-height: 0; }
 .still .pcard { animation: none !important; opacity: .62; }
 @media (prefers-reduced-motion: reduce) { .present .pcard { animation: none; opacity: .62; } }
 .scrim { position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  background: radial-gradient(ellipse 54% 22% at 50% 50%, rgba(13, 16, 22, .94) 46%, rgba(13, 16, 22, 0) 100%); }
+  background: radial-gradient(ellipse 54% 22% at 50% 50%, rgba(var(--bg-rgb), .94) 46%, rgba(var(--bg-rgb), 0) 100%); }
 
 
 /* ===================== outline, conclusion, thank you ===================== */
@@ -727,3 +742,7 @@ sup { font-size: .65em; line-height: 0; }
 
 /* part of a conclusion line in plain text */
 .conclusion .plain { color: var(--fg); font-weight: 350; }
+
+/* light theme: the glows around the muons and the kaon are softer on white */
+:root[data-theme="light"] .mu-glow { opacity: .3; }
+:root[data-theme="light"] .k-glow { opacity: .35; }

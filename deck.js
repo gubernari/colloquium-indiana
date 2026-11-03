@@ -1558,8 +1558,8 @@
 
     // the measurements: [bin low, bin high, value, error, horizontal offset of the error bar inside the bin]
     const EXP = [
-      ["BaBar", "#c9d1e0", [[2, 4.3, 2.12, 0.65, 0], [4.3, 8.12, 2.45, 0.54, 0]]],
-      ["Belle", "#7d8799", [[1, 6, 4.57, 0.80, 0]]],
+      ["BaBar", "var(--grey-a)", [[2, 4.3, 2.12, 0.65, 0], [4.3, 8.12, 2.45, 0.54, 0]]],
+      ["Belle", "var(--grey-b)", [[1, 6, 4.57, 0.80, 0]]],
       ["LHCb", "var(--aqua)", [[1, 2, 2.34, 0.15, -0.14], [2, 3, 2.83, 0.15, -0.14], [3, 4, 2.55, 0.15, -0.14], [4, 5, 2.22, 0.15, -0.14], [5, 6, 2.32, 0.15, -0.14], [6, 7, 2.47, 0.15, -0.14], [7, 8, 2.31, 0.15, -0.14]]],
       ["CMS", "var(--cyan)", [[1, 2, 2.135, 0.24, 0.14], [2, 3, 3.05, 0.24, 0.14], [3, 4, 2.53, 0.24, 0.14], [4, 5, 2.46, 0.24, 0.14], [5, 6, 2.52, 0.24, 0.14], [6, 7, 2.49, 0.24, 0.14], [7, 8, 2.33, 0.24, 0.14]]],
     ];
@@ -1587,8 +1587,8 @@
     };
     entry(P.x0 + 250, 36, "var(--aqua)", "LHCb");
     entry(P.x0 + 352, 36, "var(--cyan)", "CMS");
-    entry(P.x0 + 250, 70, "#c9d1e0", "BaBar");
-    entry(P.x0 + 352, 70, "#7d8799", "Belle");
+    entry(P.x0 + 250, 70, "var(--grey-a)", "BaBar");
+    entry(P.x0 + 352, 70, "var(--grey-b)", "Belle");
   }
 
   /* ---- new physics or strong interactions? a balance that cannot decide ---- */
@@ -1811,13 +1811,13 @@
   // divider: fuzzy glowing circles (all the same size, like the Sun) rising like in a liquid: mostly grey, a few in the three colours
   const bc = $("#s-part1 .bubbles");
   if (bc) {
-    const G = "154,165,186";
-    const GLOW = [G, G, G, G, G, G, G, G, "0,255,160", G, G, G, G, G, G, G, G, "255,67,200", G, G, G, G, G, G, G, G, "0,230,255"];   // about 1 in 9 coloured, the three colours equally
+    const G = "var(--grey-rgb)";
+    const GLOW = [G, G, G, G, G, G, G, G, "var(--aqua-rgb)", G, G, G, G, G, G, G, G, "var(--magenta-rgb)", G, G, G, G, G, G, G, G, "var(--cyan-rgb)"];   // about 1 in 9 coloured, the three colours equally
     for (let i = 0; i < 72; i++) {
       const b = document.createElement("span"), dur = 20 + Math.random() * 10, rgb = GLOW[i % GLOW.length];
       b.className = "bubble";
       b.style.cssText = `left:${(Math.random() * 93).toFixed(1)}%;--c:${rgb};` +
-        `--dur:${dur.toFixed(1)}s;--delay:${(-Math.random() * dur).toFixed(1)}s;--o:${(rgb === "154,165,186" ? 0.45 + Math.random() * 0.3 : 0.6 + Math.random() * 0.3).toFixed(2)};` +
+        `--dur:${dur.toFixed(1)}s;--delay:${(-Math.random() * dur).toFixed(1)}s;--o:${(rgb === G ? 0.45 + Math.random() * 0.3 : 0.6 + Math.random() * 0.3).toFixed(2)};` +
         `--sway:${((Math.random() - 0.5) * 80).toFixed(0)}px;--ty:${(-Math.random() * 760).toFixed(0)}px`;
       bc.appendChild(b);
     }
@@ -1831,11 +1831,11 @@
       const a = rand() * 2 * Math.PI, bend = (rand() - 0.5) * 1.1, R0 = 330 + rand() * 60, R1 = 190 + rand() * 70;
       const p = (R, ang) => [CX + R * 1.5 * Math.cos(ang), CY + R * 0.85 * Math.sin(ang)];   // the picture is wider than tall: tracks stay inside it
       const s = p(R0, a), e = p(R1, a + bend), c = p((R0 + R1) / 2, a + bend * 0.2);
-      const colour = i % 5 === 2 ? COLS[(i / 5 | 0) % 3] : "#5d6b82";
+      const colour = i % 5 === 2 ? COLS[(i / 5 | 0) % 3] : "var(--track)";
       const dur = 7 + rand() * 4;
       el("path", { d: `M${f(s[0])} ${f(s[1])} Q${f(c[0])} ${f(c[1])} ${f(e[0])} ${f(e[1])}`, class: "cv-line", pathLength: 1, stroke: colour,
-                   "stroke-width": colour === "#5d6b82" ? 1.4 : 2.4,
-                   style: `--dur:${dur.toFixed(1)}s;--delay:${(rand() * 5).toFixed(1)}s;--o:${colour === "#5d6b82" ? (0.35 + rand() * 0.25).toFixed(2) : (0.55 + rand() * 0.3).toFixed(2)}` }, cv);
+                   "stroke-width": colour === "var(--track)" ? 1.4 : 2.4,
+                   style: `--dur:${dur.toFixed(1)}s;--delay:${(rand() * 5).toFixed(1)}s;--o:${colour === "var(--track)" ? (0.35 + rand() * 0.25).toFixed(2) : (0.55 + rand() * 0.3).toFixed(2)}` }, cv);
     }
   }
 
@@ -1884,7 +1884,7 @@
 
   // safety net: SVG text has no colour of its own and would default to black on the dark background;
   // a presentation attribute gives every label a light default, and any CSS rule still overrides it
-  document.querySelectorAll(".reveal svg text").forEach((t) => { if (!t.hasAttribute("fill")) t.setAttribute("fill", "#eef1f6"); });
+  document.querySelectorAll(".reveal svg text").forEach((t) => { if (!t.hasAttribute("fill")) t.setAttribute("fill", "var(--fg)"); });
 
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.04, center: false, hash: true,
@@ -1892,6 +1892,20 @@
     controls: false, controlsTutorial: false, progress: true, slideNumber: "c",
     plugins: window.RevealNotes ? [window.RevealNotes] : [],
   });
+
+  // colour theme: dark (default) or light; ?theme=light in the link, the key T switches
+  const applyTheme = (t) => {
+    document.documentElement.dataset.theme = t;
+    try { localStorage.setItem("theme", t); } catch (err) {}
+  };
+  {
+    let t = new URLSearchParams(location.search).get("theme");
+    if (t !== "light" && t !== "dark") { try { t = localStorage.getItem("theme"); } catch (err) { t = null; } }
+    document.documentElement.dataset.theme = t === "light" ? "light" : "dark";
+  }
+  Reveal.addKeyBinding({ keyCode: 84, key: "T", description: "Switch between the dark and the light colours" },
+    () => applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light"));
+
   // the title slide and the part dividers carry no page number
   const showNumber = () => {
     const n = document.querySelector(".reveal .slide-number");
