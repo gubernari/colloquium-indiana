@@ -749,3 +749,11 @@ sup { font-size: .65em; line-height: 0; }
 
 /* beyond perturbation theory: the generic formula sits close under the first paragraph */
 #s-perturb .group { gap: 12px; }
+
+/* the penguin: the spectator antiquark in grey, the gluons faint */
+.quark.q-u { stroke: var(--muted); } .arrow.a-u { fill: var(--muted); }
+.pgl { fill: none; stroke: var(--boson); stroke-width: 1.6; opacity: .45; }
+
+/* the effective operator: the square where the b quark turns into an s quark */
+.op-box { fill: var(--surface); stroke: var(--lime); stroke-width: 3; }
+.op-label { fill: var(--lime); font-family: var(--font); font-size: 22px; font-style: italic; font-weight: 500; }

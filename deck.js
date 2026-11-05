@@ -64,6 +64,13 @@
     return d;
   }
 
+  // a gluon coil between two quark lines: a coil overshoots its end by up to about 2r, so it stops short and a straight bit
+  // finishes it exactly on the line (it must not poke through the line below); inside a meson the ends hide under the quark dots
+  function gluonPath(x1, y1, x2, y2, r, inside) {
+    const L = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / L, uy = (y2 - y1) / L, cut = inside ? 0 : 1.7 * r;
+    return coil(x1, y1, x2 - ux * cut, y2 - uy * cut, r) + (inside ? "" : `L${f(x2)} ${f(y2)}`);
+  }
+
   /* ---------------- hadrons: quarks on gluon springs ---------------- */
   const CHARGE = ["var(--magenta)", "var(--aqua)", "var(--cyan)"];
   const PAIRS = [[0, 1], [1, 2], [2, 0]];
@@ -602,10 +609,91 @@
   function buildPenguin() {
     const w = $("#w-boson"), ph = $("#photon");
     if (!w) return;
-    // a rounded arch (half ellipse), so the wiggle keeps an even wavelength all the way round
-    const arch = (t) => [300 - 100 * Math.cos(Math.PI * t), 270 - 110 * Math.sin(Math.PI * t)];
-    w.setAttribute("d", wavy(arch, 8, 6, 300));
-    ph.setAttribute("d", wavy(line(300, 160, 300, 72), 4.5, 6));
+    // a rounded arch (half ellipse) from the first to the second vertex, so the wiggle keeps an even wavelength
+    const arch = (t) => [320 - 70 * Math.cos(Math.PI * t), 258 - 100 * Math.sin(Math.PI * t)];
+    w.setAttribute("d", wavy(arch, 7, 6, 300));
+    // a straight photon line whose first wiggle goes up (negative amplitude), away from the W
+    ph.setAttribute("d", wavy(line(320, 158, 455, 118), 4.5, -6));
+    // gluons between the quarks: there, but faint and grey. A coil overshoots its end by up to about 2r, so it stops
+    // short and a straight bit finishes it exactly on the line (it must not poke through the line below)
+    const gl = $("#peng-gluons");
+    // [from, to, loop radius, inside a meson?]: inside a meson the ends hide under the quark dots
+    if (gl) [[70, 258, 70, 342, 6, true], [515, 312, 515, 378, 5, true],
+             [150, 258, 168, 342, 7], [198, 258, 184, 342, 8], [240, 258, 256, 342, 7],
+             [408, 266, 426, 357, 7], [440, 279, 458, 364, 8]]
+      .forEach(([x1, y1, x2, y2, r, inside]) => el("path", { d: gluonPath(x1, y1, x2, y2, r, inside), class: "pgl" }, gl));
+  }
+  // B -> K with the flavour transition drawn as a square (effective operator, kind "square") or as a heavy Z' that goes
+  // on to two muons (kind "zprime", with the mass reach below); the same picture as the penguin otherwise
+  function buildTransition(id, kind = "square", matrixElement = false) {
+    const g = document.getElementById(id);
+    if (!g) return;
+    const zp = kind === "zprime";
+    const qdot = (cx, cy, r, colour, letter, anti) => {
+      el("circle", { cx, cy, r, class: "quark-dot", style: `fill:${colour}` }, g);
+      txt(g, letter, { x: cx, y: cy, dy: f(r * 0.3), "text-anchor": "middle", class: "quark-txt", style: `font-size:${f(r * 0.9)}px` });
+      if (anti) el("line", { x1: f(cx - r * 0.19), x2: f(cx + r * 0.19), y1: f(cy - r * 0.25), y2: f(cy - r * 0.25), stroke: "var(--bg)", "stroke-width": f(Math.max(1.6, r * 0.06)), "stroke-linecap": "round" }, g);
+    };
+    const bEnd = zp ? 320 : 303, sx = zp ? 320 : 337;                 // where the b line ends and the s line starts
+    const slope = (310 - 258) / (515 - sx), bend = 515 - 36 / slope - 30;   // the spectator starts bending a little before the s line's slope would need
+    const uSlope = 36 / (515 - bend);
+    const sY = (x) => 258 + slope * (x - sx), uY = (x) => 342 + Math.max(0, x - bend) * uSlope;
+    el("ellipse", { cx: 70, cy: 300, rx: 52, ry: 100, class: "meson m-b" }, g);
+    el("ellipse", { cx: 515, cy: 344, rx: 44, ry: 80, class: "meson m-k" }, g);
+    txt(g, "B", { x: 70, y: 438, "text-anchor": "middle", class: "meson-label" });
+    txt(g, "K", { x: 515, y: 460, "text-anchor": "middle", class: "meson-label" });
+    // gluons: the first stays clear of the B, the last clear of the K
+    const a1 = sx + 64, a2 = sx + 96;
+    [[70, 258, 70, 342, 6, true], [515, 312, 515, 378, 5, true], [150, 258, 168, 342, 7], [198, 258, 184, 342, 8], [246, 258, 262, 342, 7],
+     [a1, sY(a1), a1 + 16, uY(a1 + 16), 7], [a2, sY(a2), a2 + 16, uY(a2 + 16), 8]]
+      .forEach(([x1, y1, x2, y2, r, inside]) => el("path", { d: gluonPath(x1, y1, x2, y2, r, inside), class: "pgl" }, g));
+    el("path", { d: `M515 378 L${f(bend)} 342 H70`, class: "quark q-u" }, g);
+    el("path", { d: "M300 342 l14 -7 v14 z", class: "arrow a-u" }, g);
+    txt(g, "u", { x: 300, y: 376, "text-anchor": "middle", class: "q-label" });
+    el("path", { d: `M70 258 H${bEnd}`, class: "quark q-b" }, g);
+    el("path", { d: "M175 258 l-14 -7 v14 z", class: "arrow a-b" }, g);
+    txt(g, "b", { x: 168, y: 238, "text-anchor": "middle", class: "q-label t-b" });
+    el("path", { d: `M${sx} 258 L515 310`, class: "quark q-s" }, g);
+    const ax = sx + 62;
+    el("path", { d: "M0 0 l-14 -7 v14 z", class: "arrow a-s", transform: `translate(${ax} ${f(sY(ax))}) rotate(${f(Math.atan(slope) * 180 / Math.PI)})` }, g);
+    txt(g, "s", { x: 458, y: 274, "text-anchor": "middle", class: "q-label t-s" });
+    if (!zp) {
+      // the effective operator: where the b quark turns into an s quark
+      el("rect", { x: 303, y: 241, width: 34, height: 34, rx: 4, class: "op-box" }, g);
+      txt(g, "b → s", { x: 320, y: 222, "text-anchor": "middle", class: "op-label" });
+    } else {
+      // the heavy Z' connects b, s and the muons directly
+      el("path", { d: wavy(line(320, 258, 455, 118), 5, 7), class: "boson np drawon", pathLength: 1, style: "--d:0.4s;--dur:0.9s" }, g);
+      txt(g, "Z′", { x: 404, y: 214, class: "q-label c-np fadein", style: "--d:0.9s" });
+      txt(g, "new heavy particle", { x: 372, y: 168, "text-anchor": "end", class: "fig-tag c-np fadein", style: "--d:0.9s" });
+      [[545, 70], [545, 166]].forEach(([x, y]) => el("path", { d: `M455 118 L${x} ${y}`, class: "lepton drawon", pathLength: 1, style: "--d:1.2s;--dur:0.6s" }, g));
+      [[320, 258], [455, 118]].forEach(([x, y]) => el("circle", { cx: x, cy: y, r: 5, class: "vertex" }, g));
+      muLabel(g, 553, 68, "start", "+", { class: "mu-label fadein", style: "--d:1.6s" });
+      muLabel(g, 553, 186, "start", "−", { class: "mu-label fadein", style: "--d:1.6s" });
+    }
+    qdot(70, 258, 24, "var(--magenta)", "b");
+    qdot(70, 342, 20, "var(--muted)", "u", true);
+    qdot(515, 312, 20, "var(--aqua)", "s");
+    qdot(515, 378, 17, "var(--muted)", "u", true);
+    if (matrixElement) {   // the whole B -> K step, quarks and gluons included, is the hadronic matrix element
+      el("path", { d: "M70 478 V494 H515 V478", class: "bracket" }, g);
+      txt(g, "hadronic matrix element", { x: 292, y: 530, "text-anchor": "middle", class: "fig-tag", style: "fill:var(--aqua);font-weight:600" });
+    }
+    if (!zp) return;
+    // with the click: how far up in mass each kind of search can see (log scale)
+    const R = el("g", { class: "on-1" }, g);
+    const lx = (tev) => 60 + (Math.log10(tev) + 0.5) * (500 / 3);
+    [[488, 5, "r-direct", "LHC, direct", "a few TeV", 0], [528, 100, "r-indirect", "rare decays, indirect", "~100 TeV", 0.35]]
+      .forEach(([y, m, cls, inside, value, delay]) => {
+        el("rect", { x: 60, y, width: f(lx(m) - 60), height: 32, rx: 5, class: `rbar ${cls}`, style: `--d:${delay}s` }, R);
+        txt(R, inside, { x: 74, y: y + 23, class: "bar-in" });
+        txt(R, value, { x: f(lx(m) + 12), y: y + 23, class: "fig-tag late" });
+      });
+    el("path", { d: "M60 574 H560", class: "axis-line" }, R);
+    [1, 10, 100].forEach((m) => {
+      el("path", { d: `M${f(lx(m))} 568 v12`, class: "axis-line" }, R);
+      txt(R, `${m} TeV`, { x: f(lx(m)), y: 604, "text-anchor": "middle", class: "axis-tick" });
+    });
   }
   const lat = { coarse: [], fine: [], count: 0, active: false };
   function buildGrid(sel, n, step, x0, y0, nodeR, key) {
@@ -1775,8 +1863,8 @@
   buildWays();
   buildInvisible();
   buildHistory();
-  buildNP();
-  buildMeasure();
+  buildTransition("np", "zprime");
+  buildTransition("measure", "square", true);
   buildSeries();
   buildSumRules();
   buildFormulas();
@@ -1838,7 +1926,7 @@
       const dur = 7 + rand() * 4;
       el("path", { d: `M${f(s[0])} ${f(s[1])} Q${f(c[0])} ${f(c[1])} ${f(e[0])} ${f(e[1])}`, class: "cv-line", pathLength: 1, stroke: colour,
                    "stroke-width": colour === "var(--track)" ? 1.4 : 2.4,
-                   style: `--dur:${dur.toFixed(1)}s;--delay:${(rand() * 5).toFixed(1)}s;--o:${colour === "var(--track)" ? (0.35 + rand() * 0.25).toFixed(2) : (0.55 + rand() * 0.3).toFixed(2)}` }, cv);
+                   style: `--dur:${dur.toFixed(1)}s;--delay:${(rand() * 5 * 0.4).toFixed(1)}s;--o:${colour === "var(--track)" ? (0.35 + rand() * 0.25).toFixed(2) : (0.55 + rand() * 0.3).toFixed(2)}` }, cv);
     }
   }
 
