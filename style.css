@@ -169,7 +169,7 @@ sup { font-size: .65em; line-height: 0; }
 .proscons li::before { position: absolute; left: 0; top: -2px; font-weight: 700; font-size: 30px; }
 .proscons .pro::before { content: "+"; color: var(--aqua); }
 .proscons .con::before { content: "−"; color: var(--magenta); }
-.lat-link { stroke: var(--boson); stroke-opacity: .55; stroke-width: 2; transition: stroke .25s, stroke-opacity .25s; }
+.lat-link { stroke: var(--boson); stroke-opacity: .55; stroke-width: 2; transition: stroke .5s, stroke-opacity .5s; }
 .lat-node { fill: var(--fg); }
 .dim-line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
 .present .lat-node.pop { transform-box: fill-box; transform-origin: center; animation: pop .5s cubic-bezier(.3,1.6,.5,1) var(--d, 0s) backwards; }
@@ -746,3 +746,6 @@ sup { font-size: .65em; line-height: 0; }
 /* light theme: the glows around the muons and the kaon are softer on white */
 :root[data-theme="light"] .mu-glow { opacity: .3; }
 :root[data-theme="light"] .k-glow { opacity: .35; }
+
+/* beyond perturbation theory: the generic formula sits close under the first paragraph */
+#s-perturb .group { gap: 12px; }

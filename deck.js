@@ -1344,7 +1344,10 @@
       txt(parent, "…", { x: 60 + vals.length * 100 + 4, y: base - 4, class: "fig-tag" });
       txt(parent, verdict, { x: 300, y: base + 36, "text-anchor": "middle", class: "fig-tag", style: `fill:${colour};font-weight:600` });
     };
-    mixed(g, { x: 44, y: 40, class: "fig-tag" }, [["QED: ", 0], ["α", 1], [" ≈ 1/137", 0]]);
+    const te = txt(g, "QED: ", { x: 44, y: 40, class: "fig-tag" });
+    el("tspan", { style: "font-style:italic" }, te).textContent = "α";
+    el("tspan", { dy: "0.2em", "font-size": "72%", style: "font-style:italic" }, te).textContent = "e";   // same small drop as the subscript of α_s
+    el("tspan", { dy: "-0.2em" }, te).textContent = " ≈ 1/137";
     panel(g, 40, [[1, ["1"]], [0.01, ["10", "−2"]], [0.0001, ["10", "−4"]], [0.000001, ["10", "−6"]]], "var(--aqua)", "good convergence", false);
     const q = el("g", { class: "on-1" }, g);
     const t = txt(q, "strong force in a meson: ", { x: 44, y: 326, class: "fig-tag" });
@@ -1939,5 +1942,5 @@
     requestAnimationFrame(loop);
     setInterval(swapColour, 4500);
   }
-  setInterval(flicker, 140);
+  setInterval(flicker, 340);
 })();
